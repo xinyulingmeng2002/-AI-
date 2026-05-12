@@ -45,19 +45,67 @@ const IDENTITY_CONFIG: Record<AIIdentity, {
 
 export function ChatHubPanel() {
   const [identity, setIdentity] = useState<AIIdentity>('sister')
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'welcome',
-      role: 'assistant',
-      content: IDENTITY_CONFIG.sister.welcome
-    }
-  ])
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [historyLoaded, setHistoryLoaded] = useState(false)
   const [input, setInput] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const models = useModelConfigStore((s) => s.models)
   const currentWorkspaceId = useWorkspaceStore((s) => s.currentWorkspaceId)
+
+  // 加载历史聊天记录
+  useEffect(() => {
+    if (!currentWorkspaceId) return
+    const loadHistory = async () => {
+      try {
+        const result = await window.mindforge.db.getAll('chat_history', currentWorkspaceId)
+        if (result.success && result.data && result.data.length > 0) {
+          const msgs: ChatMessage[] = (result.data as Record<string, unknown>[])
+            .sort((a, b) => (a.created_at as string).localeCompare(b.created_at as string))
+            .map((r) => ({
+              id: r.id as string,
+              role: r.role as ChatMessage['role'],
+              content: r.content as string
+            }))
+          setMessages(msgs)
+        } else {
+          // 无历史记录，显示欢迎消息
+          const config = IDENTITY_CONFIG[identity]
+          setMessages([{ id: 'welcome', role: 'assistant', content: config.welcome }])
+        }
+      } catch { /* DB可能不可用 */ }
+      setHistoryLoaded(true)
+    }
+    loadHistory()
+  }, [currentWorkspaceId])
+
+  // 保存消息到数据库
+  const saveMessage = async (msg: ChatMessage) => {
+    if (!currentWorkspaceId || msg.id === 'welcome') return
+    try {
+      await window.mindforge.db.insert('chat_history', {
+        id: msg.id,
+        workspace_id: currentWorkspaceId,
+        role: msg.role,
+        content: msg.content,
+        identity: identity
+      })
+    } catch { /* ignore */ }
+  }
+
+  // 更新消息时保存
+  const updateAssistantMessage = (content: string) => {
+    setMessages((prev) => {
+      const updated = [...prev]
+      const last = updated[updated.length - 1]
+      if (last?.role === 'assistant') {
+        last.content = content
+        if (!content.startsWith('抱歉')) saveMessage(last)
+      }
+      return updated
+    })
+  }
 
   // 监听审核结果事件
   useEffect(() => {
@@ -88,14 +136,11 @@ export function ChatHubPanel() {
 
   const handleIdentityChange = (newIdentity: AIIdentity) => {
     setIdentity(newIdentity)
-    const config = IDENTITY_CONFIG[newIdentity]
-    setMessages([
-      {
-        id: 'welcome',
-        role: 'assistant',
-        content: config.welcome
-      }
-    ])
+    // 只改变身份，不清除历史记录
+    if (messages.length <= 1 && messages[0]?.id === 'welcome') {
+      const config = IDENTITY_CONFIG[newIdentity]
+      setMessages([{ id: 'welcome', role: 'assistant', content: config.welcome }])
+    }
   }
 
   const handleSend = useCallback(async () => {
@@ -118,6 +163,9 @@ export function ChatHubPanel() {
     setInput('')
     setIsStreaming(true)
 
+    // 保存用户消息
+    saveMessage(userMsg)
+
     const config = IDENTITY_CONFIG[identity]
 
     // 构建消息历史给 AI
@@ -136,21 +184,12 @@ export function ChatHubPanel() {
           setMessages((prev) => {
             const updated = [...prev]
             const last = updated[updated.length - 1]
-            if (last.role === 'assistant') {
-              last.content += token
-            }
+            if (last?.role === 'assistant') last.content += token
             return updated
           })
         },
         onDone: (fullContent) => {
-          setMessages((prev) => {
-            const updated = [...prev]
-            const last = updated[updated.length - 1]
-            if (last.role === 'assistant') {
-              last.content = fullContent
-            }
-            return updated
-          })
+          updateAssistantMessage(fullContent)
           setIsStreaming(false)
 
           // 流式完成后，异步进行要素提取
@@ -169,14 +208,7 @@ export function ChatHubPanel() {
           })
         },
         onError: (error) => {
-          setMessages((prev) => {
-            const updated = [...prev]
-            const last = updated[updated.length - 1]
-            if (last.role === 'assistant') {
-              last.content = `抱歉，出了点问题：${error.message}`
-            }
-            return updated
-          })
+          updateAssistantMessage(`抱歉，出了点问题：${error.message}`)
           setIsStreaming(false)
         }
       }

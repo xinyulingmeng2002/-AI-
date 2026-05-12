@@ -106,6 +106,18 @@ CREATE INDEX IF NOT EXISTS idx_characters_ws ON characters(workspace_id);
 CREATE INDEX IF NOT EXISTS idx_hooks_ws ON pending_hooks(workspace_id);
 CREATE INDEX IF NOT EXISTS idx_chapters_ws ON chapter_summaries(workspace_id);
 CREATE INDEX IF NOT EXISTS idx_subplots_ws ON subplots(workspace_id);
+CREATE TABLE IF NOT EXISTS chat_history (
+  id TEXT PRIMARY KEY,
+  workspace_id TEXT NOT NULL,
+  role TEXT NOT NULL,
+  content TEXT NOT NULL DEFAULT '',
+  identity TEXT NOT NULL DEFAULT 'sister',
+  extraction_card TEXT DEFAULT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_chat_ws ON chat_history(workspace_id);
 CREATE INDEX IF NOT EXISTS idx_modules_ws ON dynamic_modules(workspace_id);
 
 -- FTS5 全文搜索虚拟表（用于 RAG 关键词检索）

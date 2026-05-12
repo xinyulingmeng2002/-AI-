@@ -123,7 +123,7 @@ function registerWorkspaceHandlers() {
     try {
       const tables = [
         'characters', 'pending_hooks', 'chapter_summaries', 'chapter_outlines',
-        'world_state', 'subplots', 'resource_ledger', 'dynamic_modules'
+        'world_state', 'subplots', 'resource_ledger', 'dynamic_modules', 'chat_history'
       ]
       for (const table of tables) {
         deleteByWorkspace(table, id)
