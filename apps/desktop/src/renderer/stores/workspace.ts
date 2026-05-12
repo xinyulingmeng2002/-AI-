@@ -41,10 +41,17 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     try {
       const result = await window.mindforge.workspace.list()
       if (result.success && result.data) {
-        set({
-          workspaces: result.data as WorkspaceInfo[],
-          loading: false
-        })
+        const mapped = (result.data as Record<string, unknown>[]).map((r) => ({
+          id: r.id as string,
+          title: r.title as string,
+          genre: r.genre as string,
+          oneLiner: (r.one_liner as string) ?? '',
+          coverPath: (r.cover_path as string) ?? '',
+          status: r.status as string,
+          createdAt: r.created_at as string,
+          updatedAt: r.updated_at as string
+        }))
+        set({ workspaces: mapped, loading: false })
       }
     } catch {
       set({ loading: false })

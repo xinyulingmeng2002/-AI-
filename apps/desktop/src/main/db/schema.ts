@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS chapter_summaries (
   title TEXT DEFAULT '',
   data_json TEXT NOT NULL DEFAULT '{}',
   content TEXT DEFAULT '',
+  word_count INTEGER DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE

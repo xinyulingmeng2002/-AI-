@@ -28,7 +28,7 @@ export function WorldPanel() {
             const data = JSON.parse((r.data_json as string) || '{}')
             return {
               id: r.id as string,
-              name: r.name as string,
+              name: (r.module_name as string) || (r.name as string),
               category: data.category || '其他',
               description: data.description || ''
             }

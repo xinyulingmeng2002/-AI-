@@ -3,6 +3,7 @@ import { PenLine, Save, ShieldCheck } from 'lucide-react'
 import { TipTapEditor } from '@/components/editor/TipTapEditor'
 import { useEditorStore } from '@/stores/editor'
 import { useOutlineStore } from '@/stores/outline'
+import { useWorkspaceStore } from '@/stores/workspace'
 import { triggerAudit, formatAuditMessage } from '@/services/audit-service'
 
 const AUTO_SAVE_DELAY = 2000 // 2秒无操作后自动保存
@@ -10,6 +11,7 @@ const AUTO_SAVE_DELAY = 2000 // 2秒无操作后自动保存
 export function EditorPanel() {
   const { wordCount, isDirty, setWordCount, setIsDirty, setSaved } = useEditorStore()
   const { activeChapterId, updateChapterWordCount, volumes } = useOutlineStore()
+  const currentWorkspaceId = useWorkspaceStore((s) => s.currentWorkspaceId)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastContentRef = useRef({ html: '', text: '' })
   const [auditing, setAuditing] = useState(false)
@@ -119,10 +121,11 @@ export function EditorPanel() {
   }, [doSave])
 
   const handleAudit = async () => {
-    if (!currentChapter?.outline || !lastContentRef.current.text) return
+    if (!currentChapter?.outline || !lastContentRef.current.text || !currentWorkspaceId) return
     setAuditing(true)
     try {
       const result = await triggerAudit({
+        workspaceId: currentWorkspaceId,
         chapterOutline: currentChapter.outline,
         chapterContent: lastContentRef.current.text
       })
