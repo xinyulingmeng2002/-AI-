@@ -1,13 +1,15 @@
 {
   "name": "mindforge-novel-studio",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "心御AI小说辅助器 — AI驱动的网文创作辅助桌面应用",
   "scripts": {
     "dev": "pnpm --filter @mindforge/desktop dev",
     "build": "pnpm --filter @mindforge/desktop build",
     "electron:dev": "pnpm --filter @mindforge/desktop electron:dev",
     "electron:build": "pnpm --filter @mindforge/desktop electron:build",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
     "lint": "eslint . --ext .ts,.tsx",
     "typecheck": "pnpm -r typecheck"
   },
