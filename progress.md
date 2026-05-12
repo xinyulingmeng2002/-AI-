@@ -16,3 +16,13 @@
 - 8 Medium: 静默catch/z-index体系等
 - 4 Low: emoji残留等
 
+## 2026-05-12 全量修复完成
+
+- UI重构: Impeccable + UI/UX Pro Max OKLCH色板
+- 角色DB同步: loadFromDb + 编辑写回
+- 快捷键面板: Ctrl+K
+- CSP头 + IPC净化
+- 3 Critical + 关键High全部修复
+
+Commits: 55 | 代码: ~20,000行 | 文档: v2.0
+
