@@ -8,9 +8,11 @@ directories:
 files:
   - dist/**/*
   - node_modules/**/*
-  - "!node_modules/**/*.{mk,a,o,node}"
+  - "!node_modules/**/*.{mk,a,o}"
 
 asar: true
+
+npmRebuild: false
 
 win:
   target:
