@@ -38,6 +38,12 @@ contextBridge.exposeInMainWorld('mindforge', {
   getAppVersion: () => ipcRenderer.invoke('app:version'),
   getPlatform: () => process.platform,
 
+  // 备份
+  backup: {
+    create: () => ipcRenderer.invoke('backup:create'),
+    getDbPath: () => ipcRenderer.invoke('app:getDbPath')
+  },
+
   // 安全存储（API Key等）
   secureStore: {
     get: (key: string) => ipcRenderer.invoke('secure:get', key),

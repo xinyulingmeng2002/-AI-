@@ -1,11 +1,13 @@
 // IPC 处理注册 — 主进程与渲染进程的桥梁
 
-import { ipcMain } from 'electron'
+import { ipcMain, app, dialog } from 'electron'
 import {
-  initDatabase, getDatabase,
+  initDatabase, getDatabase, getDbPath,
   insertOne, updateOne, getOne, getAll, deleteOne, deleteByWorkspace
 } from './db/database'
 import { randomUUID } from 'crypto'
+import { copyFileSync, existsSync, mkdirSync } from 'fs'
+import { join, dirname } from 'path'
 
 // ---------- 数据库操作 ----------
 
@@ -134,8 +136,34 @@ function registerWorkspaceHandlers() {
   })
 }
 
+function registerBackupHandlers() {
+  ipcMain.handle('backup:create', async () => {
+    try {
+      const result = await dialog.showSaveDialog({
+        title: '备份数据库',
+        defaultPath: `mindforge-backup-${new Date().toISOString().slice(0, 10)}.db`,
+        filters: [{ name: 'SQLite数据库', extensions: ['db'] }]
+      })
+      if (result.canceled || !result.filePath) {
+        return { success: false, error: '已取消' }
+      }
+      const dbPath = getDbPath()
+      const backupDir = dirname(result.filePath)
+      if (!existsSync(backupDir)) mkdirSync(backupDir, { recursive: true })
+      copyFileSync(dbPath, result.filePath)
+      return { success: true, path: result.filePath }
+    } catch (e) {
+      return { success: false, error: (e as Error).message }
+    }
+  })
+
+  ipcMain.handle('app:getDbPath', () => getDbPath())
+  ipcMain.handle('app:version', () => app.getVersion())
+}
+
 export function registerAllHandlers() {
   initDatabase()
   registerDbHandlers()
   registerWorkspaceHandlers()
+  registerBackupHandlers()
 }

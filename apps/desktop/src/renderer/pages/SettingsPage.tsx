@@ -228,10 +228,14 @@ export function SettingsPage() {
             <div className="flex items-center justify-between">
               <span className="text-sm text-white/70">数据备份</span>
               <button
-                onClick={() => alert('备份功能：SQLite数据库文件位于应用数据目录中，可手动复制备份。\n\n自动备份功能将在v0.2中实现。')}
+                onClick={async () => {
+                  const { createBackup } = await import('@/services/backup-service')
+                  const result = await createBackup()
+                  alert(result.success ? `备份成功！\n${result.path}` : `备份失败：${result.error}`)
+                }}
                 className="bg-surface-lighter text-xs text-white/60 rounded px-3 py-1 border border-white/5 hover:text-white/80"
               >
-                查看说明
+                立即备份
               </button>
             </div>
             <div className="flex items-center justify-between">

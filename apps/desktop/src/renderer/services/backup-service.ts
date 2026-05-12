@@ -1,21 +1,23 @@
-// 数据备份/恢复服务
+// 数据备份服务
 
-import { getDbPath } from '../../main/db/database'
-
-export async function backupDatabase(): Promise<{ success: boolean; path?: string; error?: string }> {
+export async function createBackup(): Promise<{ success: boolean; path?: string; error?: string }> {
   try {
-    // 显示保存对话框
-    const result = await window.mindforge.writeFile(
-      `mindforge-backup-${new Date().toISOString().slice(0, 10)}.db`,
-      ''
-    )
-
-    // 复制数据库文件
-    const dbPath = await window.mindforge.getAppVersion()
-    // 实际应通过IPC复制文件
-    return { success: true }
+    // @ts-expect-error - backup:create is registered in main process
+    return await window.mindforge.backup?.create?.() ?? {
+      success: false, error: '备份功能不可用'
+    }
   } catch (e) {
     return { success: false, error: (e as Error).message }
+  }
+}
+
+export async function getDbPath(): Promise<string> {
+  try {
+    // @ts-expect-error - dynamic IPC channel
+    const result = await window.mindforge.backup?.getDbPath?.()
+    return result as string ?? ''
+  } catch {
+    return ''
   }
 }
 
