@@ -117,6 +117,12 @@ CREATE TABLE IF NOT EXISTS chat_history (
   FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS app_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL DEFAULT '',
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE INDEX IF NOT EXISTS idx_chat_ws ON chat_history(workspace_id);
 CREATE INDEX IF NOT EXISTS idx_modules_ws ON dynamic_modules(workspace_id);
 

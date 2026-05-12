@@ -21,13 +21,33 @@ function loadGoal(): number {
   } catch { return 4000 }
 }
 
+const DATE_KEY = 'mindforge_writing_date'
+
 function saveGoal(goal: number) {
   try { localStorage.setItem(STORAGE_KEY, String(goal)) } catch { /* noop */ }
 }
 
+function loadTodayWritten(): number {
+  try {
+    const date = localStorage.getItem(DATE_KEY)
+    const today = new Date().toDateString()
+    if (date === today) {
+      return parseInt(localStorage.getItem('mindforge_today_written') ?? '0', 10)
+    }
+  } catch { /* noop */ }
+  return 0
+}
+
+function saveTodayWritten(count: number) {
+  try {
+    localStorage.setItem(DATE_KEY, new Date().toDateString())
+    localStorage.setItem('mindforge_today_written', String(count))
+  } catch { /* noop */ }
+}
+
 export const useWritingGoalStore = create<WritingGoalState>((set, get) => ({
   dailyGoal: loadGoal(),
-  todayWritten: 0,
+  todayWritten: loadTodayWritten(),
   goalMet: false,
 
   setDailyGoal: (goal) => {
@@ -38,6 +58,7 @@ export const useWritingGoalStore = create<WritingGoalState>((set, get) => ({
   setTodayWritten: (count) => {
     const { dailyGoal } = get()
     set({ todayWritten: count, goalMet: count >= dailyGoal })
+    saveTodayWritten(count)
   },
 
   getProgress: () => {

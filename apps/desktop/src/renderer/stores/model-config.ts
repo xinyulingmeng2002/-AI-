@@ -40,10 +40,24 @@ function generateId(): string {
   return `m_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`
 }
 
+function savePersist(state: Partial<ModelConfigState>) {
+  try { localStorage.setItem('mindforge_models', JSON.stringify({ models: state.models, defaultModelId: state.defaultModelId, taskMappings: state.taskMappings })) } catch { /* ignore */ }
+}
+
+function loadPersist(): { models: ModelConfigEntry[]; defaultModelId: string; taskMappings: Record<string, string | null> } | null {
+  try {
+    const raw = localStorage.getItem('mindforge_models')
+    if (raw) return JSON.parse(raw)
+  } catch { /* ignore */ }
+  return null
+}
+
+const saved = loadPersist()
+
 export const useModelConfigStore = create<ModelConfigState>((set, get) => ({
-  models: [],
-  defaultModelId: '',
-  taskMappings: {
+  models: saved?.models ?? [],
+  defaultModelId: saved?.defaultModelId ?? '',
+  taskMappings: (saved?.taskMappings as Record<string, string | null>) ?? {
     chat: null,
     outline: null,
     draft: null,
@@ -60,10 +74,11 @@ export const useModelConfigStore = create<ModelConfigState>((set, get) => ({
       id,
       isDefault: get().models.length === 0 // 第一个模型自动设为默认
     }
-    set((s) => ({
-      models: [...s.models, entry],
-      defaultModelId: s.defaultModelId || id
-    }))
+    set((s) => {
+      const newState = { models: [...s.models, entry], defaultModelId: s.defaultModelId || id }
+      savePersist(newState)
+      return newState
+    })
   },
 
   removeModel: (id) => {
@@ -91,12 +106,14 @@ export const useModelConfigStore = create<ModelConfigState>((set, get) => ({
     }))
   },
 
-  setDefaultModel: (id) => set({ defaultModelId: id }),
+  setDefaultModel: (id) => set((s) => { savePersist({ ...s, defaultModelId: id }); return { defaultModelId: id } }),
 
   setTaskMapping: (taskType, modelId) => {
-    set((s) => ({
-      taskMappings: { ...s.taskMappings, [taskType]: modelId }
-    }))
+    set((s) => {
+      const newMappings = { ...s.taskMappings, [taskType]: modelId }
+      savePersist({ ...s, taskMappings: newMappings })
+      return { taskMappings: newMappings }
+    })
   },
 
   testConnection: async (id) => {

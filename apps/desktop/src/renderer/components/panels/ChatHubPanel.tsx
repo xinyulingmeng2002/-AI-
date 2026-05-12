@@ -44,7 +44,9 @@ const IDENTITY_CONFIG: Record<AIIdentity, {
 }
 
 export function ChatHubPanel() {
-  const [identity, setIdentity] = useState<AIIdentity>('sister')
+  const [identity, setIdentity] = useState<AIIdentity>(() => {
+    try { return (localStorage.getItem('mindforge_chat_identity') as AIIdentity) ?? 'sister' } catch { return 'sister' }
+  })
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [historyLoaded, setHistoryLoaded] = useState(false)
   const [input, setInput] = useState('')
@@ -136,6 +138,7 @@ export function ChatHubPanel() {
 
   const handleIdentityChange = (newIdentity: AIIdentity) => {
     setIdentity(newIdentity)
+    try { localStorage.setItem('mindforge_chat_identity', newIdentity) } catch { /* ignore */ }
     // 只改变身份，不清除历史记录
     if (messages.length <= 1 && messages[0]?.id === 'welcome') {
       const config = IDENTITY_CONFIG[newIdentity]

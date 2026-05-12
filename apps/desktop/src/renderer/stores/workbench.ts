@@ -43,3 +43,18 @@ export const useWorkbenchStore = create<WorkbenchState>((set) => ({
   setRightPanelRatio: (ratio) => set({ rightPanelRatio: Math.max(0.2, Math.min(0.45, ratio)) }),
   setBottomPanelRatio: (ratio) => set({ bottomPanelRatio: Math.max(0.12, Math.min(0.4, ratio)) })
 }))
+
+// 持久化面板布局偏好
+useWorkbenchStore.subscribe((state) => {
+  const prefs = { leftPanelVisible: state.leftPanelVisible, rightPanelVisible: state.rightPanelVisible, bottomPanelVisible: state.bottomPanelVisible, bottomPanelTab: state.bottomPanelTab, leftPanelRatio: state.leftPanelRatio, rightPanelRatio: state.rightPanelRatio, bottomPanelRatio: state.bottomPanelRatio }
+  try { localStorage.setItem('mindforge_layout', JSON.stringify(prefs)) } catch { /* ignore */ }
+})
+
+// 加载面板布局偏好
+try {
+  const saved = localStorage.getItem('mindforge_layout')
+  if (saved) {
+    const prefs = JSON.parse(saved)
+    useWorkbenchStore.setState(prefs)
+  }
+} catch { /* ignore */ })
