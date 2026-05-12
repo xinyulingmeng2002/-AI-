@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type BottomPanelTab = 'characters' | 'world' | 'hooks' | 'outline-compare' | 'namegen' | 'timeline' | 'relations'
+export type BottomPanelTab = 'characters' | 'world' | 'hooks' | 'outline-compare' | 'namegen' | 'timeline' | 'relations' | 'subplots'
 
 interface WorkbenchState {
   // 面板显示状态
