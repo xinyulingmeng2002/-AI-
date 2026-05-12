@@ -1,7 +1,7 @@
 import { useWorkbenchStore, type BottomPanelTab } from '@/stores/workbench'
 import { useCharacterStore } from '@/stores/characters'
 import { useOutlineStore } from '@/stores/outline'
-import { Users, Globe, Link, FileText, Wand2, Clock } from 'lucide-react'
+import { Users, Globe, Link, FileText, Wand2, Clock, GitGraph } from 'lucide-react'
 import { CharacterPanel } from './CharacterPanel'
 import { CharacterEditor } from './CharacterEditor'
 import { ChapterOutlineEditor } from './ChapterOutlineEditor'
@@ -10,13 +10,15 @@ import { HooksPanel } from './HooksPanel'
 import { NameGenerator } from './NameGenerator'
 import { TimelinePanel } from './TimelinePanel'
 import { OutlineComparePanel } from './OutlineComparePanel'
+import { RelationshipGraph } from './RelationshipGraph'
 
 const TABS: Array<{ id: BottomPanelTab; label: string; icon: React.ReactNode }> = [
   { id: 'characters', label: '人物', icon: <Users size={13} /> },
+  { id: 'relations', label: '关系', icon: <GitGraph size={13} /> },
   { id: 'world', label: '世界观', icon: <Globe size={13} /> },
   { id: 'hooks', label: '伏笔', icon: <Link size={13} /> },
   { id: 'timeline', label: '时间线', icon: <Clock size={13} /> },
-  { id: 'outline-compare', label: '纲要对照', icon: <FileText size={13} /> },
+  { id: 'outline-compare', label: '纲要', icon: <FileText size={13} /> },
   { id: 'namegen', label: '起名', icon: <Wand2 size={13} /> }
 ]
 
@@ -51,6 +53,7 @@ export function BottomPanel() {
         {bottomPanelTab === 'world' && <WorldPanel />}
         {bottomPanelTab === 'hooks' && <HooksPanel />}
         {bottomPanelTab === 'timeline' && <TimelinePanel />}
+        {bottomPanelTab === 'relations' && <RelationshipGraph />}
         {bottomPanelTab === 'namegen' && <NameGenerator />}
         {bottomPanelTab === 'outline-compare' && <OutlineComparePanel />}
       </div>

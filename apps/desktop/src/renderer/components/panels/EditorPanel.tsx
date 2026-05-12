@@ -1,5 +1,5 @@
 import { useRef, useEffect, useCallback, useState } from 'react'
-import { PenLine, ShieldCheck, Maximize2, AlertTriangle } from 'lucide-react'
+import { PenLine, ShieldCheck, Maximize2, Download } from 'lucide-react'
 import { TipTapEditor } from '@/components/editor/TipTapEditor'
 import { FocusMode } from '@/components/editor/FocusMode'
 import { useEditorStore } from '@/stores/editor'
@@ -200,6 +200,18 @@ export function EditorPanel() {
           >
             <Maximize2 size={13} />
           </button>
+          {lastContentRef.current.text && (
+            <button
+              onClick={async () => {
+                const { exportChapterAsText } = await import('@/services/export-service')
+                exportChapterAsText(currentChapter?.title ?? '章节', lastContentRef.current.text, 'txt')
+              }}
+              className="flex items-center gap-1 text-white/40 hover:text-white/70 transition-colors"
+              title="导出TXT"
+            >
+              <Download size={13} />
+            </button>
+          )}
           {currentChapter?.outline && lastContentRef.current.text && (
             <button
               onClick={handleAudit}

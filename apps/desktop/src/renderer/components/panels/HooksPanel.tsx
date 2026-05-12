@@ -76,8 +76,24 @@ export function HooksPanel() {
 
   const recovered = hooks.filter((h) => h.status === 'recovered').length
 
+  const overdueCritical = hooks.filter((h) => h.importance === 'critical' && h.status === 'pending')
+  const overdueMajor = hooks.filter((h) => h.importance === 'major' && h.status === 'pending')
+
   return (
     <div className="p-2 space-y-1.5 overflow-y-auto h-full">
+      {/* 逾期提醒 */}
+      {(overdueCritical.length > 0 || overdueMajor.length > 0) && (
+        <div className="bg-red-400/5 border border-red-400/20 rounded-lg p-2 text-[10px] mb-2">
+          <div className="text-red-400/80 font-medium mb-1">⚠ 伏笔提醒</div>
+          {overdueCritical.length > 0 && (
+            <div className="text-red-400/60">🔴 {overdueCritical.length} 个重要伏笔尚未回收</div>
+          )}
+          {overdueMajor.length > 0 && (
+            <div className="text-yellow-400/60">🟡 {overdueMajor.length} 个中等伏笔待处理</div>
+          )}
+        </div>
+      )}
+
       {hooks.map((hook) => {
         const currentStatus = STATUS_OPTIONS.find((s) => s.value === hook.status)
         return (
