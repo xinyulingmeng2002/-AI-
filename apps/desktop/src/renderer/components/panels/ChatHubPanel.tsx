@@ -75,7 +75,11 @@ export function ChatHubPanel() {
       }
     }
     window.addEventListener('audit-result', handler)
-    return () => window.removeEventListener('audit-result', handler)
+    window.addEventListener('observer-result', handler)
+    return () => {
+      window.removeEventListener('audit-result', handler)
+      window.removeEventListener('observer-result', handler)
+    }
   }, [])
 
   useEffect(() => {

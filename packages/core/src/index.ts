@@ -4,5 +4,6 @@
 export * from './model-router'
 export * from './extraction'
 export * from './audit'
+export * from './rag'
 
-export const VERSION = '0.1.0'
+export const VERSION = '0.2.0'

@@ -107,4 +107,14 @@ CREATE INDEX IF NOT EXISTS idx_hooks_ws ON pending_hooks(workspace_id);
 CREATE INDEX IF NOT EXISTS idx_chapters_ws ON chapter_summaries(workspace_id);
 CREATE INDEX IF NOT EXISTS idx_subplots_ws ON subplots(workspace_id);
 CREATE INDEX IF NOT EXISTS idx_modules_ws ON dynamic_modules(workspace_id);
+
+-- FTS5 全文搜索虚拟表（用于 RAG 关键词检索）
+CREATE VIRTUAL TABLE IF NOT EXISTS chapters_fts USING fts5(
+  chunk_id,
+  content,
+  chapter_id,
+  volume_number,
+  chapter_number,
+  tokenize='unicode61'
+);
 `

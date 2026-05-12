@@ -1,10 +1,13 @@
 import { useRef, useEffect, useCallback, useState } from 'react'
-import { PenLine, Save, ShieldCheck } from 'lucide-react'
+import { PenLine, ShieldCheck, Maximize2, AlertTriangle } from 'lucide-react'
 import { TipTapEditor } from '@/components/editor/TipTapEditor'
+import { FocusMode } from '@/components/editor/FocusMode'
 import { useEditorStore } from '@/stores/editor'
 import { useOutlineStore } from '@/stores/outline'
 import { useWorkspaceStore } from '@/stores/workspace'
 import { triggerAudit, formatAuditMessage } from '@/services/audit-service'
+import { runObserver } from '@/services/observer-service'
+import { detectSensitiveWords, formatSensitiveReport } from '@/services/sensitive-words'
 
 const AUTO_SAVE_DELAY = 2000 // 2秒无操作后自动保存
 
@@ -15,8 +18,10 @@ export function EditorPanel() {
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastContentRef = useRef({ html: '', text: '' })
   const [auditing, setAuditing] = useState(false)
-  const [editorKey, setEditorKey] = useState(0) // 用于重建编辑器
+  const [editorKey, setEditorKey] = useState(0)
   const [loadedContent, setLoadedContent] = useState<string>('')
+  const [focusMode, setFocusMode] = useState(false)
+  const observerRanRef = useRef(false)
 
   // 找到当前章节的纲要
   const currentChapter = volumes
@@ -54,6 +59,7 @@ export function EditorPanel() {
         setLoadedContent('')
       }
       setEditorKey((k) => k + 1)
+      observerRanRef.current = false // 新章节重置Observer
     }
 
     loadContent()
@@ -88,6 +94,18 @@ export function EditorPanel() {
       if (result.success) {
         updateChapterWordCount(activeChapterId, text.length)
         setSaved()
+
+        // Observer: 首次保存后自动提取要素
+        if (!observerRanRef.current && text.length > 500 && currentWorkspaceId) {
+          observerRanRef.current = true
+          runObserver(text, currentChapter?.title ?? '', currentWorkspaceId).then((obsResult) => {
+            if (obsResult.card) {
+              window.dispatchEvent(new CustomEvent('observer-result', {
+                detail: { message: `## Observer 自动提取\n\n从本章中提取了 ${obsResult.card.entities.length} 个要素并已写入数据库。\n\n可在人物档案/世界观/伏笔面板中查看。` }
+              }))
+            }
+          })
+        }
       }
     } catch (err) {
       console.error('Auto-save failed:', err)
@@ -129,9 +147,16 @@ export function EditorPanel() {
         chapterOutline: currentChapter.outline,
         chapterContent: lastContentRef.current.text
       })
-      // 将审核结果以系统消息形式展示（通过自定义事件通知中枢）
+      let msg = formatAuditMessage(result)
+
+      // 敏感词检测
+      const sensitiveMatches = detectSensitiveWords(lastContentRef.current.text)
+      if (sensitiveMatches.length > 0) {
+        msg += '\n\n' + formatSensitiveReport(sensitiveMatches)
+      }
+
       window.dispatchEvent(new CustomEvent('audit-result', {
-        detail: { message: formatAuditMessage(result), result }
+        detail: { message: msg, result }
       }))
     } catch (err) {
       console.error('Audit failed:', err)
@@ -161,6 +186,13 @@ export function EditorPanel() {
           )}
         </div>
         <div className="flex items-center gap-3 text-xs text-white/30">
+          <button
+            onClick={() => setFocusMode(!focusMode)}
+            className="flex items-center gap-1 text-white/40 hover:text-white/70 transition-colors"
+            title="专注模式"
+          >
+            <Maximize2 size={13} />
+          </button>
           {currentChapter?.outline && lastContentRef.current.text && (
             <button
               onClick={handleAudit}
@@ -179,17 +211,34 @@ export function EditorPanel() {
         </div>
       </div>
       <div className="flex-1 overflow-hidden">
-        <TipTapEditor
-          key={editorKey}
-          content={loadedContent}
-          onContentChange={handleContentChange}
-          placeholder={
-            activeChapterId
-              ? "开始书写...\n\nTipTap 富文本编辑器已就绪\nCtrl+S 手动保存 · 2秒无操作自动保存"
-              : "请先在左侧大纲中创建或选择一个章节"
-          }
-          readOnly={!activeChapterId}
-        />
+        {focusMode ? (
+          <FocusMode
+            enabled={focusMode}
+            onToggle={() => setFocusMode(false)}
+            wordCount={wordCount}
+            targetWords={currentChapter?.outline?.targetWordCount ?? 0}
+          >
+            <TipTapEditor
+              key={editorKey}
+              content={loadedContent}
+              onContentChange={handleContentChange}
+              placeholder="专注写作中..."
+              readOnly={false}
+            />
+          </FocusMode>
+        ) : (
+          <TipTapEditor
+            key={editorKey}
+            content={loadedContent}
+            onContentChange={handleContentChange}
+            placeholder={
+              activeChapterId
+                ? "开始书写...\n\nTipTap 富文本编辑器已就绪\nCtrl+S 手动保存 · 2秒无操作自动保存"
+                : "请先在左侧大纲中创建或选择一个章节"
+            }
+            readOnly={!activeChapterId}
+          />
+        )}
       </div>
     </div>
   )
