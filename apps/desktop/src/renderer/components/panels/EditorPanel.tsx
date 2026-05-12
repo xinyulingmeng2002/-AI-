@@ -9,6 +9,7 @@ import { triggerAudit, formatAuditMessage } from '@/services/audit-service'
 import { runObserver } from '@/services/observer-service'
 import { detectSensitiveWords, formatSensitiveReport } from '@/services/sensitive-words'
 import { checkStyle, formatStyleReport } from '@mindforge/core'
+import { runSemanticAudit, formatSemanticReport } from '@/services/semantic-audit-service'
 
 const AUTO_SAVE_DELAY = 2000 // 2秒无操作后自动保存
 
@@ -19,6 +20,7 @@ export function EditorPanel() {
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastContentRef = useRef({ html: '', text: '' })
   const [auditing, setAuditing] = useState(false)
+  const [deepAuditing, setDeepAuditing] = useState(false)
   const [editorKey, setEditorKey] = useState(0)
   const [loadedContent, setLoadedContent] = useState<string>('')
   const [focusMode, setFocusMode] = useState(false)
@@ -172,6 +174,31 @@ export function EditorPanel() {
     }
   }
 
+  const handleDeepAudit = async () => {
+    if (!currentChapter?.outline || !lastContentRef.current.text || !currentWorkspaceId) return
+    setDeepAuditing(true)
+    try {
+      // 先跑规则审核
+      const ruleResult = await triggerAudit({
+        workspaceId: currentWorkspaceId,
+        chapterOutline: currentChapter.outline,
+        chapterContent: lastContentRef.current.text
+      })
+      // 再跑LLM语义审核
+      const fullResult = await runSemanticAudit(ruleResult, {
+        chapterContent: lastContentRef.current.text,
+        chapterOutline: JSON.stringify(currentChapter.outline, null, 2),
+        characterProfiles: '',
+        worldRules: '',
+        previousChapterSummary: '',
+        pendingHooks: ''
+      })
+      const msg = formatSemanticReport(fullResult)
+      window.dispatchEvent(new CustomEvent('audit-result', { detail: { message: msg, result: fullResult } }))
+    } catch (err) { console.error('Deep audit failed:', err) }
+    finally { setDeepAuditing(false) }
+  }
+
   // 组件卸载时保存
   useEffect(() => {
     return () => {
@@ -221,6 +248,17 @@ export function EditorPanel() {
             >
               <ShieldCheck size={13} />
               {auditing ? '审核中...' : '审核'}
+            </button>
+          )}
+          {currentChapter?.outline && lastContentRef.current.text && (
+            <button
+              onClick={handleDeepAudit}
+              disabled={deepAuditing}
+              className="flex items-center gap-1 text-accent-secondary/60 hover:text-accent-secondary transition-colors"
+              title="深度审核（LLM语义分析）"
+            >
+              <ShieldCheck size={13} />
+              {deepAuditing ? '深度分析中...' : '深度审核'}
             </button>
           )}
           <span>{wordCount} 字</span>
