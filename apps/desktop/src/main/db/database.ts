@@ -40,9 +40,23 @@ export function closeDatabase(): void {
   }
 }
 
+// 表名白名单 — 防止SQL注入
+const ALLOWED_TABLES = new Set([
+  'workspaces', 'characters', 'pending_hooks', 'chapter_summaries',
+  'chapter_outlines', 'world_state', 'subplots', 'resource_ledger',
+  'dynamic_modules', 'chat_history', 'app_settings', 'chapters_fts'
+])
+
+function validateTable(table: string): void {
+  if (!ALLOWED_TABLES.has(table)) {
+    throw new Error(`Invalid table name: ${table}`)
+  }
+}
+
 // ---------- 通用 CRUD 操作 ----------
 
 export function insertOne(table: string, data: Record<string, unknown>): void {
+  validateTable(table)
   const db = getDatabase()
   const keys = Object.keys(data)
   const placeholders = keys.map(() => '?').join(', ')
@@ -55,6 +69,7 @@ export function insertOne(table: string, data: Record<string, unknown>): void {
 }
 
 export function updateOne(table: string, id: string, data: Record<string, unknown>): void {
+  validateTable(table)
   const db = getDatabase()
   const sets = Object.keys(data).map((k) => `${k} = ?`).join(', ')
   const values = Object.values(data)
@@ -66,18 +81,21 @@ export function updateOne(table: string, id: string, data: Record<string, unknow
 }
 
 export function getOne(table: string, id: string): Record<string, unknown> | null {
+  validateTable(table)
   const db = getDatabase()
   const stmt = db.prepare(`SELECT * FROM ${table} WHERE id = ?`)
   return (stmt.get(id) as Record<string, unknown>) ?? null
 }
 
 export function getAll(table: string, workspaceId: string): Record<string, unknown>[] {
+  validateTable(table)
   const db = getDatabase()
   const stmt = db.prepare(`SELECT * FROM ${table} WHERE workspace_id = ? ORDER BY created_at ASC`)
   return stmt.all(workspaceId) as Record<string, unknown>[]
 }
 
 export function deleteOne(table: string, id: string): void {
+  validateTable(table)
   const db = getDatabase()
   const stmt = db.prepare(`DELETE FROM ${table} WHERE id = ?`)
   stmt.run(id)
@@ -85,6 +103,7 @@ export function deleteOne(table: string, id: string): void {
 
 /** 按 workspace_id 删除所有关联数据 */
 export function deleteByWorkspace(table: string, workspaceId: string): void {
+  validateTable(table)
   const db = getDatabase()
   const stmt = db.prepare(`DELETE FROM ${table} WHERE workspace_id = ?`)
   stmt.run(workspaceId)

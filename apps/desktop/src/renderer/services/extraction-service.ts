@@ -10,19 +10,6 @@ export function updateExistingSummary(summary: string) {
   existingSummary = summary
 }
 
-const extractor = createExtractor({
-  callLLM: async (messages) => {
-    let fullResponse = ''
-    await sendChatMessage(messages as never, {
-      onToken: () => {},
-      onDone: (content) => { fullResponse = content },
-      onError: (e) => { throw e }
-    })
-    return fullResponse
-  },
-  getExistingSummary: () => existingSummary
-})
-
 export interface ExtractionCallbacks {
   onCardGenerated: (card: ExtractionCard) => void
   onNoExtraction: () => void

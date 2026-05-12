@@ -40,24 +40,40 @@ function generateId(): string {
   return `m_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`
 }
 
+// 持久化：模型元数据存 localStorage，API Key 存 secureStore(主进程内存)
 function savePersist(state: Partial<ModelConfigState>) {
-  try { localStorage.setItem('mindforge_models', JSON.stringify({ models: state.models, defaultModelId: state.defaultModelId, taskMappings: state.taskMappings })) } catch { /* ignore */ }
+  try {
+    // 分离敏感数据：API Key 存到 secureStore
+    if (state.models) {
+      for (const m of state.models) {
+        if (m.apiKey) window.mindforge.secureStore.set(`apikey_${m.id}`, m.apiKey)
+      }
+    }
+    // 非敏感元数据存 localStorage
+    const safeModels = state.models?.map(({ apiKey, ...rest }) => rest) ?? undefined
+    localStorage.setItem('mindforge_models', JSON.stringify({ models: safeModels, defaultModelId: state.defaultModelId, taskMappings: state.taskMappings }))
+  } catch { /* ignore */ }
 }
 
-function loadPersist(): { models: ModelConfigEntry[]; defaultModelId: string; taskMappings: Record<string, string | null> } | null {
+async function loadPersist(): Promise<{ models: ModelConfigEntry[]; defaultModelId: string; taskMappings: Record<string, string | null> } | null> {
   try {
     const raw = localStorage.getItem('mindforge_models')
-    if (raw) return JSON.parse(raw)
-  } catch { /* ignore */ }
-  return null
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    // 从 secureStore 恢复 API Key
+    if (parsed.models) {
+      for (const m of parsed.models) {
+        m.apiKey = (await window.mindforge.secureStore.get(`apikey_${m.id}`)) ?? ''
+      }
+    }
+    return parsed
+  } catch { return null }
 }
 
-const saved = loadPersist()
-
 export const useModelConfigStore = create<ModelConfigState>((set, get) => ({
-  models: saved?.models ?? [],
-  defaultModelId: saved?.defaultModelId ?? '',
-  taskMappings: (saved?.taskMappings as Record<string, string | null>) ?? {
+  models: [],
+  defaultModelId: '',
+  taskMappings: {
     chat: null,
     outline: null,
     draft: null,
@@ -161,3 +177,14 @@ export const useModelConfigStore = create<ModelConfigState>((set, get) => ({
     }))
   }
 }))
+
+// 异步加载持久化配置
+loadPersist().then((saved) => {
+  if (saved) {
+    useModelConfigStore.setState({
+      models: saved.models,
+      defaultModelId: saved.defaultModelId,
+      taskMappings: saved.taskMappings as Record<string, string | null>
+    })
+  }
+})

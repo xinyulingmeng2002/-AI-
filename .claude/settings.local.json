@@ -16,7 +16,9 @@
       "Bash(rm -rf \"C:/Users/王甚/AppData/Local/electron-builder/Cache/winCodeSign\")",
       "Bash(pnpm electron:build)",
       "Bash(Start-Process *)",
-      "Bash(powershell.exe *)"
+      "Bash(powershell.exe *)",
+      "Bash(Get-ChildItem -Recurse -Depth 0 \"F:\\\\Claude Code\\\\心御AI小说辅助器\\\\apps\")",
+      "Bash(Select-Object -ExpandProperty FullName)"
     ]
   }
 }
