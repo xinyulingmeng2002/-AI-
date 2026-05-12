@@ -1,13 +1,30 @@
 import { useEffect, useState } from 'react'
 import { useWorkspaceStore } from '@/stores/workspace'
-import { Link, AlertTriangle, CheckCircle2, Clock } from 'lucide-react'
+import { Link, AlertTriangle, CheckCircle2, Clock, Trash2 } from 'lucide-react'
+import { EmptyState, LoadingText } from '@/components/shared/Loading'
 
 interface HookItem {
   id: string
   description: string
   importance: string
   status: string
-  plantedChapter: number | null
+}
+
+const STATUS_OPTIONS = [
+  { value: 'pending', label: '待回收', icon: <Clock size={10} className="text-yellow-400" /> },
+  { value: 'partially_recovered', label: '部分回收', icon: <AlertTriangle size={10} className="text-orange-400" /> },
+  { value: 'recovered', label: '已回收', icon: <CheckCircle2 size={10} className="text-green-400" /> },
+  { value: 'abandoned', label: '已废弃', icon: <Clock size={10} className="text-white/20" /> }
+]
+
+const IMPORTANCE_COLORS: Record<string, string> = {
+  critical: 'border-l-red-400',
+  major: 'border-l-yellow-400',
+  minor: 'border-l-white/20'
+}
+
+const IMPORTANCE_LABELS: Record<string, string> = {
+  critical: '重要', major: '中等', minor: '次要'
 }
 
 export function HooksPanel() {
@@ -21,74 +38,84 @@ export function HooksPanel() {
   }, [currentWorkspaceId])
 
   const loadHooks = async () => {
+    if (!currentWorkspaceId) return
     try {
-      const result = await window.mindforge.db.getAll('pending_hooks', currentWorkspaceId!)
+      const result = await window.mindforge.db.getAll('pending_hooks', currentWorkspaceId)
       if (result.success && result.data) {
-        setHooks(
-          (result.data as Record<string, unknown>[]).map((r) => {
-            const data = JSON.parse((r.data_json as string) || '{}')
-            return {
-              id: r.id as string,
-              description: (r.description as string) || data.description || '',
-              importance: data.importance || 'minor',
-              status: data.status || 'pending',
-              plantedChapter: data.plantedChapter as number | null
-            }
-          })
-        )
+        setHooks((result.data as Record<string, unknown>[]).map((r) => {
+          const data = JSON.parse((r.data_json as string) || '{}')
+          return {
+            id: r.id as string,
+            description: (r.description as string) || data.description || '',
+            importance: data.importance || 'minor',
+            status: data.status || 'pending'
+          }
+        }))
       }
     } catch { /* ignore */ }
     setLoading(false)
   }
 
-  if (loading) return <div className="text-white/20 text-[11px] text-center py-8">加载中...</div>
+  const updateStatus = async (hook: HookItem, newStatus: string) => {
+    const data = { description: hook.description, importance: hook.importance, status: newStatus }
+    await window.mindforge.db.update('pending_hooks', hook.id, {
+      data_json: JSON.stringify(data)
+    })
+    loadHooks()
+  }
 
+  const removeHook = async (id: string) => {
+    await window.mindforge.db.delete('pending_hooks', id)
+    loadHooks()
+  }
+
+  if (loading) return <LoadingText />
   if (hooks.length === 0) {
-    return (
-      <div className="text-white/20 text-[11px] text-center py-8 leading-relaxed px-4">
-        暂无伏笔记录<br />
-        在智能交流中枢或章纲要中<br />
-        设定的伏笔会自动出现在这里
-      </div>
-    )
+    return <EmptyState>暂无伏笔记录。在智能交流中枢或章纲要中设定的伏笔会自动出现在这里。</EmptyState>
   }
 
-  const statusIcons: Record<string, React.ReactNode> = {
-    pending: <Clock size={10} className="text-yellow-400" />,
-    partially_recovered: <AlertTriangle size={10} className="text-orange-400" />,
-    recovered: <CheckCircle2 size={10} className="text-green-400" />,
-    abandoned: <Clock size={10} className="text-white/20" />
-  }
-
-  const importanceColors: Record<string, string> = {
-    critical: 'border-l-red-400',
-    major: 'border-l-yellow-400',
-    minor: 'border-l-white/20'
-  }
+  const recovered = hooks.filter((h) => h.status === 'recovered').length
 
   return (
-    <div className="p-2 space-y-1 overflow-y-auto h-full">
-      {hooks.map((hook) => (
-        <div
-          key={hook.id}
-          className={`border-l-2 ${importanceColors[hook.importance] ?? 'border-l-white/10'}
-                      pl-2 py-1.5 rounded-r hover:bg-white/5 text-xs`}
-        >
-          <div className="flex items-center gap-1.5 text-white/60">
-            {statusIcons[hook.status]}
-            <span className={`text-[10px] px-1 py-0.5 rounded ${
-              hook.importance === 'critical' ? 'text-red-400 bg-red-400/10' :
-              hook.importance === 'major' ? 'text-yellow-400 bg-yellow-400/10' :
-              'text-white/20 bg-white/5'
-            }`}>
-              {hook.importance === 'critical' ? '重要' : hook.importance === 'major' ? '中等' : '次要'}
-            </span>
+    <div className="p-2 space-y-1.5 overflow-y-auto h-full">
+      {hooks.map((hook) => {
+        const currentStatus = STATUS_OPTIONS.find((s) => s.value === hook.status)
+        return (
+          <div key={hook.id}
+            className={`border-l-2 ${IMPORTANCE_COLORS[hook.importance] ?? 'border-l-white/10'}
+                        pl-2 py-1.5 rounded-r hover:bg-white/5 text-xs group`}>
+            <div className="flex items-center justify-between gap-1">
+              <div className="flex items-center gap-1.5 min-w-0">
+                {currentStatus?.icon}
+                <span className={`text-[9px] px-1 py-0.5 rounded shrink-0 ${
+                  hook.importance === 'critical' ? 'text-red-400 bg-red-400/10' :
+                  hook.importance === 'major' ? 'text-yellow-400 bg-yellow-400/10' :
+                  'text-white/20 bg-white/5'
+                }`}>{IMPORTANCE_LABELS[hook.importance]}</span>
+                {/* 状态下拉 */}
+                <select
+                  className="bg-transparent text-[9px] text-white/30 rounded border border-white/5 px-1 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                  value={hook.status}
+                  onChange={(e) => updateStatus(hook, e.target.value)}
+                >
+                  {STATUS_OPTIONS.map((s) => (
+                    <option key={s.value} value={s.value}>{s.label}</option>
+                  ))}
+                </select>
+              </div>
+              <button
+                onClick={() => removeHook(hook.id)}
+                className="btn-ghost p-0.5 opacity-0 group-hover:opacity-100 hover:text-red-400 shrink-0"
+              >
+                <Trash2 size={9} />
+              </button>
+            </div>
+            <p className="mt-1 text-white/50 leading-relaxed line-clamp-2 text-[11px]">{hook.description}</p>
           </div>
-          <p className="mt-1 text-white/50 leading-relaxed line-clamp-2">{hook.description}</p>
-        </div>
-      ))}
+        )
+      })}
       <div className="text-[10px] text-white/20 pt-2 text-center">
-        共 {hooks.length} 个伏笔 · {hooks.filter((h) => h.status === 'recovered').length} 个已回收
+        共 {hooks.length} 个 · {recovered} 个已回收
       </div>
     </div>
   )

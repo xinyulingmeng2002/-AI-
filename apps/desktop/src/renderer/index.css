@@ -9,6 +9,14 @@
     box-sizing: border-box;
   }
 
+  /* Electron 标题栏拖拽区域 */
+  .drag {
+    -webkit-app-region: drag;
+  }
+  .no-drag {
+    -webkit-app-region: no-drag;
+  }
+
   html, body, #root {
     height: 100%;
     overflow: hidden;

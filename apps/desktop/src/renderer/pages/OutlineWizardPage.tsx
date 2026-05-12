@@ -21,19 +21,36 @@ export function OutlineWizardPage() {
     setReviewing(true)
     setStep('review')
 
-    // 模拟 AI 审核（实际项目中使用模型路由层调用 LLM）
-    await new Promise((r) => setTimeout(r, 1500))
+    try {
+      // 使用模型路由层做真实AI审核
+      const { createRouter } = await import('@mindforge/core')
+      const { useModelConfigStore } = await import('@/stores/model-config')
+      const store = useModelConfigStore.getState()
+      const configs = store.toCoreConfigs()
 
-    const hasBasicElements =
-      outlineText.length >= 30
-
-    if (hasBasicElements) {
+      if (configs.length > 0) {
+        const router = createRouter(configs, store.defaultModelId)
+        const response = await router.chat('audit', [
+          {
+            role: 'system',
+            content: `你是专业的网文大纲审核师。评估大纲是否具备基本创作要素：核心冲突、主要人物、世界观设定、主线方向。用1-2段中文给出友好、鼓励性的评估，指出做得好的地方和可以补充的方向。不要说"需要更多信息"等模板话术。如果大纲内容已具备基本框架，明确说"基础框架已经具备"；如果过于简略，温和地建议补充方向。`
+          },
+          { role: 'user', content: `请审核以下网文初始大纲：\n\n作品名：${workspace?.title}\n类型：${workspace?.genre}\n简介：${workspace?.oneLiner || '无'}\n\n大纲内容：\n${outlineText}` }
+        ])
+        setReviewResult(response.content)
+      } else {
+        // 无模型时的兜底
+        setReviewResult(
+          outlineText.length >= 30
+            ? '你的大纲基础框架已经具备。不过当前未配置AI模型，暂时无法进行深度分析。配置模型后可以获得更详细的审核反馈。现在可以进入创作工作台开始创作。'
+            : '大纲内容似乎还比较简略。建议至少包含：故事的核心冲突、主要人物、世界观的基本设定。不过没关系，这些都可以在智能交流中枢中边聊边完善。'
+        )
+      }
+    } catch {
       setReviewResult(
-        '你的大纲基础框架已经具备，包含了故事的基本方向。在实际使用时，AI会基于你配置的模型进行更详细的分析，评估世界观完整性、人物动机清晰度、主线张力等维度。现在可以进入创作工作台，在智能交流中枢中继续完善。'
-      )
-    } else {
-      setReviewResult(
-        '大纲内容似乎还比较简略。建议至少包含：故事的核心冲突、主要人物、世界观的基本设定。不过没关系，这些都可以在智能交流中枢中边聊边完善。'
+        outlineText.length >= 30
+          ? '你的大纲基础框架已经具备。AI审核暂时不可用（检查模型配置和网络），但你随时可以进入工作台开始创作，大纲会在中枢聊天中持续完善。'
+          : '大纲还可以再丰富一些。不过不必一次写完——进入工作台后，智能交流中枢会陪你慢慢完善。'
       )
     }
     setReviewing(false)
