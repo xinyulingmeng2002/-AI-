@@ -71,8 +71,10 @@ export function StoryboardPanel() {
               onDragStart={() => setDragging(i)}
               onDragOver={(e) => e.preventDefault()}
               onDrop={() => handleDrop(i)}
-              className={`border-l-3 ${functionColors[beat.function] ?? 'border-l-white/20'}
-                bg-surface-lighter rounded-r-lg p-3 cursor-grab active:cursor-grabbing
+              className={`border border-white/[0.06] rounded-lg p-3 cursor-grab active:cursor-grabbing
+                ${beat.function === 'climax' ? 'bg-red-400/[0.05]' :
+                  beat.function === 'hook' ? 'bg-violet-400/[0.05]' :
+                  beat.function === 'turn' ? 'bg-amber-400/[0.03]' : 'bg-[#1e1e32]'}
                 ${dragging === i ? 'opacity-40' : ''}
                 hover:bg-white/5 transition-colors`}
             >

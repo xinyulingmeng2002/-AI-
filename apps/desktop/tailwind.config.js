@@ -1,29 +1,28 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    './src/renderer/**/*.{ts,tsx}',
-    './index.html'
-  ],
+  content: ['./src/renderer/**/*.{ts,tsx}', './index.html'],
   darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        // 深色主题专用色板
         surface: {
-          DEFAULT: '#1a1a2e',
-          light: '#222240',
-          lighter: '#2a2a4a'
+          DEFAULT: '#0f0f1a',  // Abyss — deepest
+          light: '#161625',    // Void — panels background
+          lighter: '#1e1e32'   // Mist — cards, elevated surfaces
         },
         accent: {
-          primary: '#6c63ff',
-          secondary: '#48cae4',
-          warm: '#ff6b6b'
+          primary: '#7c6ff7',   // cool violet (OKLCH 65% 0.18 280)
+          secondary: '#5ec5d4', // cyan (OKLCH 72% 0.12 200)
+          warm: '#d4895e'       // subdued amber (OKLCH 60% 0.15 15)
         }
       },
       fontFamily: {
         sans: ['"Noto Sans SC"', '"PingFang SC"', '"Microsoft YaHei"', 'sans-serif'],
         serif: ['"Noto Serif SC"', '"Source Han Serif SC"', 'serif'],
         mono: ['"JetBrains Mono"', '"Fira Code"', 'monospace']
+      },
+      transitionTimingFunction: {
+        'out-quint': 'cubic-bezier(0.87, 0, 0.13, 1)'
       }
     }
   },

@@ -98,8 +98,10 @@ export function HooksPanel() {
         const currentStatus = STATUS_OPTIONS.find((s) => s.value === hook.status)
         return (
           <div key={hook.id}
-            className={`border-l-2 ${IMPORTANCE_COLORS[hook.importance] ?? 'border-l-white/10'}
-                        pl-2 py-1.5 rounded-r hover:bg-white/5 text-xs group`}>
+            className={`border border-white/[0.06] rounded-lg py-1.5 px-2 hover:bg-white/[0.03] text-xs group ${
+              hook.importance === 'critical' ? 'bg-red-400/[0.03]' :
+              hook.importance === 'major' ? 'bg-yellow-400/[0.02]' : ''
+            }`}>
             <div className="flex items-center justify-between gap-1">
               <div className="flex items-center gap-1.5 min-w-0">
                 {currentStatus?.icon}
