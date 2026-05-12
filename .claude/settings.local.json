@@ -14,7 +14,9 @@
       "Bash(sed -i 's/v1.3 | 日期：2026-05-12 | 状态：v0.2完成 ~80%/v1.5 | 日期：2026-05-12 | 状态：v0.3全部完成/' docs/02-项目架构书.md)",
       "Bash(sed -i 's/v1.3 | 日期：2026-05-12 | 状态：v0.2完成，v0.3规划中/v1.5 | 日期：2026-05-12 | 状态：v0.3全部完成/' docs/03-操作规范书.md)",
       "Bash(rm -rf \"C:/Users/王甚/AppData/Local/electron-builder/Cache/winCodeSign\")",
-      "Bash(pnpm electron:build)"
+      "Bash(pnpm electron:build)",
+      "Bash(Start-Process *)",
+      "Bash(powershell.exe *)"
     ]
   }
 }
