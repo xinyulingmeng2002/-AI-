@@ -61,15 +61,19 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   createWorkspace: async (data) => {
     try {
       const result = await window.mindforge.workspace.create({
-        ...data,
+        title: data.title,
+        genre: data.genre,
+        one_liner: data.oneLiner,
         cover_path: data.coverPath ?? ''
       })
       if (result.success && result.id) {
         await get().loadWorkspaces()
         return result.id as string
       }
+      console.error('创建作品失败:', result.error)
       return null
-    } catch {
+    } catch (e) {
+      console.error('创建作品异常:', e)
       return null
     }
   },
