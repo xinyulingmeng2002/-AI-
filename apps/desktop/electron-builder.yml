@@ -18,6 +18,7 @@ win:
   target:
     - target: nsis
       arch: [x64]
+  sign: null
 
 nsis:
   oneClick: false
