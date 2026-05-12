@@ -1,6 +1,8 @@
 import { useCallback, useRef, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useWorkbenchStore } from '@/stores/workbench'
 import { useEditorStore } from '@/stores/editor'
+import { useWorkspaceStore } from '@/stores/workspace'
 import { OutlinePanel } from '@/components/panels/OutlinePanel'
 import { EditorPanel } from '@/components/panels/EditorPanel'
 import { ChatHubPanel } from '@/components/panels/ChatHubPanel'
@@ -56,6 +58,10 @@ function ResizeHandle({ direction, onResize }: {
 
 export function WorkbenchPage() {
   const navigate = useNavigate()
+  const { workspaceId } = useParams<{ workspaceId: string }>()
+  const workspace = useWorkspaceStore((s) =>
+    s.workspaces.find((w) => w.id === workspaceId)
+  )
   const {
     leftPanelVisible, rightPanelVisible, bottomPanelVisible,
     leftPanelRatio, rightPanelRatio, bottomPanelRatio,
@@ -86,7 +92,7 @@ export function WorkbenchPage() {
         <div className="flex items-center gap-2">
           <BookOpen size={16} className="text-accent-primary" />
           <span className="text-sm font-medium">心御</span>
-          <span className="text-xs text-white/30 ml-2">未命名作品</span>
+          <span className="text-xs text-white/30 ml-2">{workspace?.title ?? '未命名作品'}</span>
         </div>
 
         <div className="flex-1" />
