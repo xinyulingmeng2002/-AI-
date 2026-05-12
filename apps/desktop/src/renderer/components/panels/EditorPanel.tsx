@@ -10,6 +10,8 @@ import { runObserver } from '@/services/observer-service'
 import { detectSensitiveWords, formatSensitiveReport } from '@/services/sensitive-words'
 import { checkStyle, formatStyleReport } from '@mindforge/core'
 import { runSemanticAudit, formatSemanticReport } from '@/services/semantic-audit-service'
+import { runComplianceCheck, formatComplianceReport } from '@/services/compliance-service'
+import { formatForPlatform, generatePublishChecklist, getPlatformOptions } from '@/services/platform-export'
 
 const AUTO_SAVE_DELAY = 2000 // 2秒无操作后自动保存
 
@@ -21,6 +23,8 @@ export function EditorPanel() {
   const lastContentRef = useRef({ html: '', text: '' })
   const [auditing, setAuditing] = useState(false)
   const [deepAuditing, setDeepAuditing] = useState(false)
+  const [checkingCompliance, setCheckingCompliance] = useState(false)
+  const [showExportMenu, setShowExportMenu] = useState(false)
   const [editorKey, setEditorKey] = useState(0)
   const [loadedContent, setLoadedContent] = useState<string>('')
   const [focusMode, setFocusMode] = useState(false)
@@ -199,6 +203,32 @@ export function EditorPanel() {
     finally { setDeepAuditing(false) }
   }
 
+  const handleComplianceCheck = async () => {
+    if (!lastContentRef.current.text) return
+    setCheckingCompliance(true)
+    try {
+      const result = await runComplianceCheck(lastContentRef.current.text)
+      const msg = formatComplianceReport(result)
+      window.dispatchEvent(new CustomEvent('audit-result', { detail: { message: msg } }))
+    } catch (err) { console.error('Compliance check failed:', err) }
+    finally { setCheckingCompliance(false) }
+  }
+
+  const handlePlatformExport = (platform: 'qidian' | 'zongheng' | 'fanqie' | 'qimao') => {
+    if (!lastContentRef.current.text || !currentChapter) return
+    const text = formatForPlatform({
+      platform,
+      chapters: [{ title: currentChapter.title, content: lastContentRef.current.text, chapterNumber: currentChapter.chapterNumber }]
+    })
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    const pInfo = getPlatformOptions().find(o => o.value === platform)
+    a.href = url; a.download = `${currentChapter.title}_${pInfo?.label ?? platform}.txt`; a.click()
+    URL.revokeObjectURL(url)
+    setShowExportMenu(false)
+  }
+
   // 组件卸载时保存
   useEffect(() => {
     return () => {
@@ -228,15 +258,37 @@ export function EditorPanel() {
             <Maximize2 size={13} />
           </button>
           {lastContentRef.current.text && (
-            <button
-              onClick={async () => {
-                const { exportChapterAsText } = await import('@/services/export-service')
-                exportChapterAsText(currentChapter?.title ?? '章节', lastContentRef.current.text, 'txt')
-              }}
-              className="flex items-center gap-1 text-white/40 hover:text-white/70 transition-colors"
-              title="导出TXT"
-            >
-              <Download size={13} />
+            <div className="relative">
+              <button onClick={() => setShowExportMenu(!showExportMenu)}
+                className="flex items-center gap-1 text-white/40 hover:text-white/70 transition-colors" title="导出">
+                <Download size={13} />
+              </button>
+              {showExportMenu && (
+                <div className="absolute top-full right-0 mt-1 bg-surface border border-white/10 rounded-lg p-1 z-30 shadow-xl min-w-[140px]">
+                  {getPlatformOptions().map((opt) => (
+                    <button key={opt.value}
+                      onClick={() => handlePlatformExport(opt.value)}
+                      className="block w-full text-left text-xs text-white/60 hover:text-white hover:bg-white/5 rounded px-3 py-1.5">
+                      {opt.label}
+                    </button>
+                  ))}
+                  <div className="border-t border-white/5 my-1" />
+                  <button onClick={async () => {
+                    const { exportChapterAsText } = await import('@/services/export-service')
+                    exportChapterAsText(currentChapter?.title ?? '章节', lastContentRef.current.text, 'txt')
+                    setShowExportMenu(false)
+                  }} className="block w-full text-left text-xs text-white/40 hover:text-white/60 rounded px-3 py-1.5">
+                    TXT (通用)
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+          {lastContentRef.current.text && (
+            <button onClick={handleComplianceCheck} disabled={checkingCompliance}
+              className="flex items-center gap-1 text-white/40 hover:text-white/70 transition-colors" title="合规检查">
+              <ShieldCheck size={13} />
+              {checkingCompliance ? '检查中...' : '合规'}
             </button>
           )}
           {currentChapter?.outline && lastContentRef.current.text && (
