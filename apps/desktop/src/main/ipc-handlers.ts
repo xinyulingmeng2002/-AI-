@@ -18,7 +18,7 @@ function registerDbHandlers() {
       insertOne(table, data)
       return { success: true, id: data.id }
     } catch (err) {
-      return { success: false, error: (err as Error).message }
+      return { success: false, error: "Internal error" }
     }
   })
 
@@ -27,7 +27,7 @@ function registerDbHandlers() {
       updateOne(table, id, data)
       return { success: true }
     } catch (err) {
-      return { success: false, error: (err as Error).message }
+      return { success: false, error: "Internal error" }
     }
   })
 
@@ -36,7 +36,7 @@ function registerDbHandlers() {
       const result = getOne(table, id)
       return { success: true, data: result }
     } catch (err) {
-      return { success: false, error: (err as Error).message }
+      return { success: false, error: "Internal error" }
     }
   })
 
@@ -45,7 +45,7 @@ function registerDbHandlers() {
       const results = getAll(table, workspaceId)
       return { success: true, data: results }
     } catch (err) {
-      return { success: false, error: (err as Error).message }
+      return { success: false, error: "Internal error" }
     }
   })
 
@@ -54,7 +54,7 @@ function registerDbHandlers() {
       deleteOne(table, id)
       return { success: true }
     } catch (err) {
-      return { success: false, error: (err as Error).message }
+      return { success: false, error: "Internal error" }
     }
   })
 
@@ -63,7 +63,7 @@ function registerDbHandlers() {
       deleteByWorkspace(table, workspaceId)
       return { success: true }
     } catch (err) {
-      return { success: false, error: (err as Error).message }
+      return { success: false, error: "Internal error" }
     }
   })
 }
@@ -92,7 +92,7 @@ function registerWorkspaceHandlers() {
 
       return { success: true, id: data.id }
     } catch (err) {
-      return { success: false, error: (err as Error).message }
+      return { success: false, error: "Internal error" }
     }
   })
 
@@ -104,7 +104,7 @@ function registerWorkspaceHandlers() {
       const results = stmt.all()
       return { success: true, data: results }
     } catch (err) {
-      return { success: false, error: (err as Error).message }
+      return { success: false, error: "Internal error" }
     }
   })
 
@@ -114,7 +114,7 @@ function registerWorkspaceHandlers() {
       updateOne('workspaces', id, data)
       return { success: true }
     } catch (err) {
-      return { success: false, error: (err as Error).message }
+      return { success: false, error: "Internal error" }
     }
   })
 
@@ -131,7 +131,7 @@ function registerWorkspaceHandlers() {
       deleteOne('workspaces', id)
       return { success: true }
     } catch (err) {
-      return { success: false, error: (err as Error).message }
+      return { success: false, error: "Internal error" }
     }
   })
 }

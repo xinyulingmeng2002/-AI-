@@ -4,6 +4,8 @@ import { useWorkbenchStore } from '@/stores/workbench'
 import { useEditorStore } from '@/stores/editor'
 import { useWritingGoalStore } from '@/stores/writing-goal'
 import { useWorkspaceStore } from '@/stores/workspace'
+import { useCharacterStore } from '@/stores/characters'
+import { ShortcutOverlay } from '@/components/panels/ShortcutOverlay'
 import { OutlinePanel } from '@/components/panels/OutlinePanel'
 import { EditorPanel } from '@/components/panels/EditorPanel'
 import { ChatHubPanel } from '@/components/panels/ChatHubPanel'
@@ -70,6 +72,12 @@ export function WorkbenchPage() {
   } = useWorkbenchStore()
   const { wordCount, currentChapter } = useEditorStore()
   const { todayWritten, dailyGoal, goalMet } = useWritingGoalStore()
+  const loadCharacters = useCharacterStore((s) => s.loadFromDb)
+
+  // 切换作品时加载角色
+  useEffect(() => {
+    if (workspaceId) loadCharacters(workspaceId)
+  }, [workspaceId, loadCharacters])
 
   // 键盘快捷键
   useEffect(() => {
@@ -217,6 +225,7 @@ export function WorkbenchPage() {
           模型已连接
         </span>
       </footer>
+      <ShortcutOverlay />
     </div>
   )
 }

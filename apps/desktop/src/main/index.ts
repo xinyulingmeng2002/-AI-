@@ -11,7 +11,7 @@ function createWindow(): void {
     minWidth: 1024,
     minHeight: 680,
     title: '心御AI小说辅助器',
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#0f0f1a',
     titleBarStyle: 'hiddenInset',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -23,6 +23,16 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow?.show()
+  })
+
+  // Content Security Policy
+  mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': ["default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src *; img-src 'self' data: blob:; font-src 'self' data:"]
+      }
+    })
   })
 
   // 外部链接在系统浏览器打开
