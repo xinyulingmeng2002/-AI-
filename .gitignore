@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+out/
+build/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Electron
+apps/desktop/release/
+
+# Logs
+*.log
+logs/
+
+# User data (keep test fixtures)
+app_data/
+workspaces/
+
+# Test
+coverage/
+.vitest/
+
+# Cache
+.cache/
+.turbo/
