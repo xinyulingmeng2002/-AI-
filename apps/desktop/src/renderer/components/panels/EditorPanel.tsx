@@ -13,21 +13,75 @@ export function EditorPanel() {
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastContentRef = useRef({ html: '', text: '' })
   const [auditing, setAuditing] = useState(false)
+  const [editorKey, setEditorKey] = useState(0) // 用于重建编辑器
+  const [loadedContent, setLoadedContent] = useState<string>('')
 
   // 找到当前章节的纲要
   const currentChapter = volumes
     .flatMap((v) => v.chapters)
     .find((c) => c.id === activeChapterId)
 
+  // 切换章节时加载内容
+  useEffect(() => {
+    if (!activeChapterId) {
+      setLoadedContent('')
+      setEditorKey((k) => k + 1)
+      return
+    }
+
+    // 先保存当前内容
+    if (lastContentRef.current.text) {
+      doSave(lastContentRef.current.html, lastContentRef.current.text)
+    }
+
+    // 加载新章节内容
+    const loadContent = async () => {
+      try {
+        const result = await window.mindforge.db.getOne('chapter_summaries', activeChapterId)
+        if (result.success && result.data) {
+          const content = (result.data as Record<string, unknown>).content as string ?? ''
+          setLoadedContent(content)
+          setWordCount(content.length)
+          setSaved()
+        } else {
+          setLoadedContent('')
+          setWordCount(0)
+          setSaved()
+        }
+      } catch {
+        setLoadedContent('')
+      }
+      setEditorKey((k) => k + 1)
+    }
+
+    loadContent()
+  }, [activeChapterId])
+
   const doSave = useCallback(async (html: string, text: string) => {
     if (!activeChapterId) return
 
     try {
-      // 持久化到 SQLite
-      const result = await window.mindforge.db.update('chapter_summaries', activeChapterId, {
+      const chapter = currentChapter
+      // 先尝试更新
+      let result = await window.mindforge.db.update('chapter_summaries', activeChapterId, {
         content: html,
+        data_json: JSON.stringify(chapter?.outline ?? {}),
         word_count: text.length
       })
+
+      // 如果记录不存在，插入新记录
+      if (!result.success) {
+        result = await window.mindforge.db.insert('chapter_summaries', {
+          id: activeChapterId,
+          workspace_id: '',
+          volume_number: chapter?.volumeNumber ?? 1,
+          chapter_number: chapter?.chapterNumber ?? 1,
+          title: chapter?.title ?? '',
+          content: html,
+          data_json: JSON.stringify(chapter?.outline ?? {}),
+          word_count: text.length
+        })
+      }
 
       if (result.success) {
         updateChapterWordCount(activeChapterId, text.length)
@@ -36,7 +90,7 @@ export function EditorPanel() {
     } catch (err) {
       console.error('Auto-save failed:', err)
     }
-  }, [activeChapterId, updateChapterWordCount, setSaved])
+  }, [activeChapterId, currentChapter, updateChapterWordCount, setSaved])
 
   const handleContentChange = useCallback((html: string, text: string, count: number) => {
     setWordCount(count)
@@ -123,6 +177,8 @@ export function EditorPanel() {
       </div>
       <div className="flex-1 overflow-hidden">
         <TipTapEditor
+          key={editorKey}
+          content={loadedContent}
           onContentChange={handleContentChange}
           placeholder={
             activeChapterId

@@ -5,6 +5,8 @@ import { Users, Globe, Link, FileText } from 'lucide-react'
 import { CharacterPanel } from './CharacterPanel'
 import { CharacterEditor } from './CharacterEditor'
 import { ChapterOutlineEditor } from './ChapterOutlineEditor'
+import { WorldPanel } from './WorldPanel'
+import { HooksPanel } from './HooksPanel'
 
 const TABS: Array<{ id: BottomPanelTab; label: string; icon: React.ReactNode }> = [
   { id: 'characters', label: '人物档案', icon: <Users size={13} /> },
@@ -41,18 +43,8 @@ export function BottomPanel() {
       {/* 内容区 */}
       <div className="flex-1 overflow-hidden">
         {bottomPanelTab === 'characters' && <CharacterPanel />}
-        {bottomPanelTab === 'world' && (
-          <div className="p-4 text-white/25 text-xs text-center py-8">
-            世界观管理 — 地理、势力、规则、历史<br />
-            （将在后续迭代中实现，当前可通过智能交流中枢聊天构建）
-          </div>
-        )}
-        {bottomPanelTab === 'hooks' && (
-          <div className="p-4 text-white/25 text-xs text-center py-8">
-            伏笔追踪 — 埋设 → 呼应 → 回收，全生命周期管理<br />
-            （将在后续迭代中实现）
-          </div>
-        )}
+        {bottomPanelTab === 'world' && <WorldPanel />}
+        {bottomPanelTab === 'hooks' && <HooksPanel />}
         {bottomPanelTab === 'outline-compare' && (
           <div className="p-4 text-white/25 text-xs text-center py-8">
             纲要对照 — 实时对比写作内容与章纲要<br />
