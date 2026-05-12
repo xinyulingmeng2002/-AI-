@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { MessageSquare, Send, User, Loader2 } from 'lucide-react'
-import { sendChatMessage, clearRouterCache } from '@/services/chat-service'
+import { sendChatMessage } from '@/services/chat-service'
 import { tryExtract } from '@/services/extraction-service'
 import { ExtractionCardComponent } from './ExtractionCard'
 import { useModelConfigStore } from '@/stores/model-config'

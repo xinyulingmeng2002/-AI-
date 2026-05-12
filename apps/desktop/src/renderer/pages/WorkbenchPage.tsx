@@ -2,6 +2,7 @@ import { useCallback, useRef, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useWorkbenchStore } from '@/stores/workbench'
 import { useEditorStore } from '@/stores/editor'
+import { useWritingGoalStore } from '@/stores/writing-goal'
 import { useWorkspaceStore } from '@/stores/workspace'
 import { OutlinePanel } from '@/components/panels/OutlinePanel'
 import { EditorPanel } from '@/components/panels/EditorPanel'
@@ -69,6 +70,7 @@ export function WorkbenchPage() {
     setLeftPanelRatio, setRightPanelRatio, setBottomPanelRatio
   } = useWorkbenchStore()
   const { wordCount, currentChapter } = useEditorStore()
+  const { todayWritten, dailyGoal, goalMet } = useWritingGoalStore()
 
   // 键盘快捷键
   useEffect(() => {
@@ -206,6 +208,9 @@ export function WorkbenchPage() {
           <PanelRight size={12} />
         </button>
         <span className="flex-1" />
+        <span className={goalMet ? 'text-green-400' : ''}>
+          {todayWritten}/{dailyGoal} 字
+        </span>
         <span>{wordCount} 字</span>
         <span>{currentChapter}</span>
         <span className="flex gap-1">

@@ -218,15 +218,30 @@ export function SettingsPage() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-white/70">深色模式</span>
-              <input type="checkbox" className="toggle" defaultChecked />
+              <button
+                onClick={() => document.documentElement.classList.toggle('dark')}
+                className="bg-surface-lighter text-xs text-white/60 rounded px-3 py-1 border border-white/5 hover:text-white/80"
+              >
+                切换
+              </button>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-white/70">编辑器字体大小</span>
-              <select className="bg-surface-lighter text-xs text-white/60 rounded px-2 py-1 border border-white/5">
-                <option>14px</option>
-                <option>16px</option>
-                <option>18px</option>
-              </select>
+              <span className="text-sm text-white/70">数据备份</span>
+              <button
+                onClick={() => alert('备份功能：SQLite数据库文件位于应用数据目录中，可手动复制备份。\n\n自动备份功能将在v0.2中实现。')}
+                className="bg-surface-lighter text-xs text-white/60 rounded px-3 py-1 border border-white/5 hover:text-white/80"
+              >
+                查看说明
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-white/70">导出作品数据</span>
+              <button
+                onClick={() => alert('导出功能将在v0.2中实现，支持TXT/Markdown/EPUB格式。')}
+                className="bg-surface-lighter text-xs text-white/60 rounded px-3 py-1 border border-white/5 hover:text-white/80"
+              >
+                即将推出
+              </button>
             </div>
           </div>
         </section>
