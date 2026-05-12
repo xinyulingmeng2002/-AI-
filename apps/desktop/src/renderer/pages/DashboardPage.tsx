@@ -173,7 +173,7 @@ function DailyGoalProgress({ stats }: { stats: WritingStats | null }) {
       </div>
       <div className="flex justify-between mt-2 text-[10px] text-white/30">
         <span>{todayWritten.toLocaleString()} / {dailyGoal.toLocaleString()} 字</span>
-        <span>{goalMet ? '✅ 今日目标达成！' : `${progress}%`}</span>
+        <span>{goalMet ? '[通过] 今日目标达成！' : `${progress}%`}</span>
       </div>
     </div>
   )

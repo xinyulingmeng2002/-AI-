@@ -109,8 +109,8 @@ export function StoryboardPanel() {
                 }}
               />
               <div className="flex gap-3 mt-2 text-[9px] text-white/20">
-                <span>🎯 {beat.targetWordCount}字</span>
-                <span>🎭 {beat.emotionalTone || '未设'}</span>
+                <span> {beat.targetWordCount}字</span>
+                <span> {beat.emotionalTone || '未设'}</span>
               </div>
             </div>
           ))}

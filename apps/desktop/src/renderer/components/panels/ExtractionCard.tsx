@@ -20,7 +20,7 @@ const RELATION_LABELS: Record<string, string> = {
   new: '新增',
   update: '更新',
   supplement: '补充',
-  conflict: '⚠ 冲突'
+  conflict: '[注意] 冲突'
 }
 
 export function ExtractionCardComponent({ card, onConfirm, onReject }: Props) {
@@ -84,7 +84,7 @@ export function ExtractionCardComponent({ card, onConfirm, onReject }: Props) {
                     }
                   }}
                 >
-                  💡 {q}
+                  {q}
                 </button>
               ))}
             </div>

@@ -143,7 +143,7 @@ export function analyzeNovelRhythm(chapters: Array<{ id: string; title: string; 
 
 export function formatRhythmReport(report: NovelRhythmReport): string {
   let msg = `## 全书节奏分析\n\n**整体节奏**: ${
-    report.overallTempo === 'fast' ? '偏快⚡' : report.overallTempo === 'slow' ? '偏慢🐢' : '均衡✅'
+    report.overallTempo === 'fast' ? '偏快' : report.overallTempo === 'slow' ? '偏慢🐢' : '均衡[通过]'
   } | 节奏变化率: ${Math.round(report.paceVariance * 100)}%`
 
   if (report.deadZones.length > 0) {

@@ -174,7 +174,7 @@ export function SettingsPage() {
 
           {testResult && (
             <div className={`mt-3 text-xs p-2 rounded ${
-              testResult.startsWith('✅') ? 'text-green-400 bg-green-400/10' : 'text-red-400 bg-red-400/10'
+              testResult.startsWith('[通过]') ? 'text-green-400 bg-green-400/10' : 'text-red-400 bg-red-400/10'
             }`}>
               {testResult}
             </div>

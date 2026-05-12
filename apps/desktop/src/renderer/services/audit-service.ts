@@ -73,7 +73,7 @@ export async function triggerAudit(context: AuditTriggerContext): Promise<AuditR
 
 export function formatAuditMessage(result: AuditResult): string {
   if (result.issues.length === 0) {
-    return `## 章节审核通过 ✅\n\n综合评分：${result.overallScore}/100\n\n没有任何问题，章节质量良好！`
+    return `## 章节审核通过 [通过]\n\n综合评分：${result.overallScore}/100\n\n没有任何问题，章节质量良好！`
   }
 
   const criticals = result.issues.filter((i) => i.severity === 'critical')
@@ -81,26 +81,26 @@ export function formatAuditMessage(result: AuditResult): string {
   const suggestions = result.issues.filter((i) => i.severity === 'suggestion')
 
   let msg = `## 章节审核报告\n\n**综合评分：${result.overallScore}/100**`
-  msg += `\n- 🔴 严重问题：${criticals.length} 个`
-  msg += `\n- 🟡 警告：${warnings.length} 个`
-  msg += `\n- 🔵 建议：${suggestions.length} 个`
+  msg += `\n- [严重] 严重问题：${criticals.length} 个`
+  msg += `\n- [警告] 警告：${warnings.length} 个`
+  msg += `\n- [建议] 建议：${suggestions.length} 个`
 
   if (criticals.length > 0) {
-    msg += '\n\n### 🔴 严重问题\n'
+    msg += '\n\n### [严重] 严重问题\n'
     criticals.forEach((i) => {
       msg += `\n- **${i.dimension}**: ${i.description}\n  → ${i.suggestion}`
     })
   }
 
   if (warnings.length > 0) {
-    msg += '\n\n### 🟡 警告\n'
+    msg += '\n\n### [警告] 警告\n'
     warnings.forEach((i) => {
       msg += `\n- **${i.dimension}**: ${i.description}\n  → ${i.suggestion}`
     })
   }
 
   if (suggestions.length > 0) {
-    msg += '\n\n### 🔵 建议\n'
+    msg += '\n\n### [建议] 建议\n'
     suggestions.slice(0, 5).forEach((i) => {
       msg += `\n- **${i.dimension}**: ${i.description}`
     })

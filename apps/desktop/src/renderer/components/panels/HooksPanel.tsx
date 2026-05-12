@@ -84,12 +84,12 @@ export function HooksPanel() {
       {/* 逾期提醒 */}
       {(overdueCritical.length > 0 || overdueMajor.length > 0) && (
         <div className="bg-red-400/5 border border-red-400/20 rounded-lg p-2 text-[10px] mb-2">
-          <div className="text-red-400/80 font-medium mb-1">⚠ 伏笔提醒</div>
+          <div className="text-red-400/80 font-medium mb-1">[注意] 伏笔提醒</div>
           {overdueCritical.length > 0 && (
-            <div className="text-red-400/60">🔴 {overdueCritical.length} 个重要伏笔尚未回收</div>
+            <div className="text-red-400/60">[严重] {overdueCritical.length} 个重要伏笔尚未回收</div>
           )}
           {overdueMajor.length > 0 && (
-            <div className="text-yellow-400/60">🟡 {overdueMajor.length} 个中等伏笔待处理</div>
+            <div className="text-yellow-400/60">[警告] {overdueMajor.length} 个中等伏笔待处理</div>
           )}
         </div>
       )}

@@ -46,7 +46,7 @@ export function formatSemanticReport(result: AuditResult): string {
   msg += `\n- 语义分析：${semanticIssues.length} 个问题`
 
   if (semanticIssues.length > 0) {
-    msg += '\n\n### 🧠 LLM语义分析\n'
+    msg += '\n\n### [语义] LLM语义分析\n'
     const byDim = semanticIssues.reduce<Record<string, typeof semanticIssues>>((acc, i) => {
       (acc[i.dimension] ??= []).push(i); return acc
     }, {})

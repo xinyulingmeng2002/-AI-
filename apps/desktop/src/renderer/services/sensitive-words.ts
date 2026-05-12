@@ -47,11 +47,11 @@ export function formatSensitiveReport(matches: SensitiveMatch[]): string {
 
   let report = '## 敏感词检测\n\n'
   if (high.length > 0) {
-    report += `### 🔴 高风险 (${high.length}处)\n`
+    report += `### [严重] 高风险 (${high.length}处)\n`
     high.forEach((m) => { report += `- \`${m.word}\` — ${m.label}\n` })
   }
   if (medium.length > 0) {
-    report += `\n### 🟡 中风险 (${medium.length}处)\n`
+    report += `\n### [警告] 中风险 (${medium.length}处)\n`
     medium.forEach((m) => { report += `- \`${m.word}\` — ${m.label}\n` })
   }
   return report

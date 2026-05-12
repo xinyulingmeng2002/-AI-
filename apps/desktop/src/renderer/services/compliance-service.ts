@@ -71,9 +71,9 @@ export async function runComplianceCheck(text: string): Promise<ComplianceResult
 
 export function formatComplianceReport(result: ComplianceResult): string {
   let report = `## 内容合规检查\n\n**综合评分：${result.score}/100** | 风险等级：${
-    result.riskLevel === 'safe' ? '🟢 安全' :
-    result.riskLevel === 'low' ? '🟡 低风险' :
-    result.riskLevel === 'medium' ? '🟠 中风险' : '🔴 高风险'
+    result.riskLevel === 'safe' ? '[通过] 安全' :
+    result.riskLevel === 'low' ? '[警告] 低风险' :
+    result.riskLevel === 'medium' ? '[警告] 中风险' : '[严重] 高风险'
   }`
 
   if (result.ruleMatches.length > 0) {

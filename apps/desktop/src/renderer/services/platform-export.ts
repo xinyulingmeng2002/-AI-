@@ -90,11 +90,11 @@ export function generatePublishChecklist(
   const avgWords = chapters.length > 0 ? totalWords / chapters.length : 0
 
   const checklist: PublishChecklist[] = [
-    { item: '总字数达标(>2万字)', passed: totalWords > 20000, note: totalWords > 20000 ? `✅ ${totalWords}字` : `❌ 仅${totalWords}字` },
+    { item: '总字数达标(>2万字)', passed: totalWords > 20000, note: totalWords > 20000 ? `[通过] ${totalWords}字` : `[失败] 仅${totalWords}字` },
     { item: '章节均字数(2000-5000)', passed: avgWords >= 2000 && avgWords <= 5000, note: `均${Math.round(avgWords)}字/章` },
-    { item: '每章有结尾钩子', passed: true, note: '⚠ 需人工确认' },
-    { item: '段落首行缩进', passed: true, note: '✅ 已自动添加' },
-    { item: '无敏感词', passed: sensitiveMatches === 0, note: sensitiveMatches === 0 ? '✅ 通过' : `❌ ${sensitiveMatches}处敏感词` },
+    { item: '每章有结尾钩子', passed: true, note: '[注意] 需人工确认' },
+    { item: '段落首行缩进', passed: true, note: '[通过] 已自动添加' },
+    { item: '无敏感词', passed: sensitiveMatches === 0, note: sensitiveMatches === 0 ? '[通过] 通过' : `[失败] ${sensitiveMatches}处敏感词` },
   ]
 
   return checklist

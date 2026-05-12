@@ -119,13 +119,13 @@ export const useModelConfigStore = create<ModelConfigState>((set, get) => ({
       })
 
       if (response.ok) {
-        set({ testResult: `✅ 连接成功 — ${model.providerName} / ${model.modelName}` })
+        set({ testResult: `[通过] 连接成功 — ${model.providerName} / ${model.modelName}` })
       } else {
         const err = await response.text()
-        set({ testResult: `❌ 连接失败 (${response.status}): ${err.slice(0, 100)}` })
+        set({ testResult: `[失败] 连接失败 (${response.status}): ${err.slice(0, 100)}` })
       }
     } catch (e) {
-      set({ testResult: `❌ 连接失败: ${(e as Error).message}` })
+      set({ testResult: `[失败] 连接失败: ${(e as Error).message}` })
     } finally {
       set({ testingConnection: false })
     }
