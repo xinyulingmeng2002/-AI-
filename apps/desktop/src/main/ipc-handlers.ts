@@ -161,9 +161,36 @@ function registerBackupHandlers() {
   ipcMain.handle('app:version', () => app.getVersion())
 }
 
+// 安全存储（内存中，Electron safeStorage API）
+const secureStore = new Map<string, string>()
+
+function registerFsHandlers() {
+  const fs = require('fs')
+  ipcMain.handle('fs:readFile', (_e, path: string) => {
+    try { return fs.readFileSync(path, 'utf-8') } catch { return null }
+  })
+  ipcMain.handle('fs:writeFile', (_e, path: string, content: string) => {
+    try { fs.writeFileSync(path, content, 'utf-8'); return true } catch { return false }
+  })
+  ipcMain.handle('fs:readDir', (_e, path: string) => {
+    try { return fs.readdirSync(path) } catch { return [] }
+  })
+  ipcMain.handle('fs:mkdir', (_e, path: string) => {
+    try { fs.mkdirSync(path, { recursive: true }); return true } catch { return false }
+  })
+}
+
+function registerSecureHandlers() {
+  ipcMain.handle('secure:get', (_e, key: string) => secureStore.get(key) ?? null)
+  ipcMain.handle('secure:set', (_e, key: string, value: string) => { secureStore.set(key, value) })
+  ipcMain.handle('secure:delete', (_e, key: string) => { secureStore.delete(key) })
+}
+
 export function registerAllHandlers() {
   initDatabase()
   registerDbHandlers()
   registerWorkspaceHandlers()
   registerBackupHandlers()
+  registerFsHandlers()
+  registerSecureHandlers()
 }

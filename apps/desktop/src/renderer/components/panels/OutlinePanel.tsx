@@ -9,7 +9,7 @@ export function OutlinePanel() {
   const {
     volumes, activeChapterId,
     addVolume, removeVolume, toggleVolumeExpanded,
-    addChapter, removeChapter, setActiveChapter, openOutlineEditor
+    addChapter, removeChapter, setActiveChapter, openOutlineEditor, reorderChapters
   } = useOutlineStore()
   const [newVolTitle, setNewVolTitle] = useState('')
   const [addingVol, setAddingVol] = useState(false)
