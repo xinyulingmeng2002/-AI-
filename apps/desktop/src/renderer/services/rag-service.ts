@@ -1,6 +1,8 @@
-// RAG 检索服务
+// RAG 检索服务 — 关键词 + 可选LLM嵌入语义搜索
 
 import { chunkText, extractKeywords, relevanceScore, type TextChunk } from '@mindforge/core'
+import { createRouter } from '@mindforge/core'
+import { useModelConfigStore } from '@/stores/model-config'
 
 export interface SearchResult {
   chunk: TextChunk
@@ -100,6 +102,38 @@ export async function searchRelevantContext(
     .sort((a, b) => b.score - a.score)
     .filter((r, i, arr) => arr.findIndex((x) => x.chunk.id === r.chunk.id) === i)
     .slice(0, topK)
+}
+
+/** LLM 语义搜索 — 使用模型判断相关性 */
+export async function semanticSearch(
+  query: string,
+  candidates: SearchResult[],
+  topK = 3
+): Promise<SearchResult[]> {
+  if (candidates.length === 0) return []
+
+  const store = useModelConfigStore.getState()
+  const configs = store.toCoreConfigs()
+  if (configs.length === 0) return candidates.slice(0, topK)
+
+  try {
+    const router = createRouter(configs, store.defaultModelId)
+    const chunks = candidates.map((r, i) =>
+      `[${i}] 第${r.chunk.volumeNumber}卷${r.chunk.chapterNumber}章: ${r.chunk.content.slice(0, 200)}`
+    ).join('\n---\n')
+
+    const response = await router.chat('extract', [
+      { role: 'system', content: '你是一个检索助手。根据查询判断哪些章节片段最相关。只返回相关片段的编号，用逗号分隔，如：0,2,5。不要返回其他内容。' },
+      { role: 'user', content: `查询：${query}\n\n候选片段：\n${chunks}\n\n请返回最相关的${topK}个片段编号。` }
+    ])
+
+    const indices = (response.content.match(/\d+/g) ?? []).map(Number).filter((n) => n >= 0 && n < candidates.length)
+    if (indices.length > 0) {
+      return indices.slice(0, topK).map((i) => candidates[i])
+    }
+  } catch { /* fallback to keyword */ }
+
+  return candidates.slice(0, topK)
 }
 
 /** 构建 RAG 增强的系统提示 */

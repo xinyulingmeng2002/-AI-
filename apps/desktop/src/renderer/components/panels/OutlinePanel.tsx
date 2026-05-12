@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import {
   FolderTree, Plus, GripVertical, ChevronRight, ChevronDown,
-  FileText, Trash2, Edit3, MoreHorizontal
+  FileText, Trash2, Edit3
 } from 'lucide-react'
 import { useOutlineStore } from '@/stores/outline'
 
@@ -29,6 +29,34 @@ export function OutlinePanel() {
     setNewChTitle('')
     setAddingCh(null)
   }
+
+  const [dragChapter, setDragChapter] = useState<{ id: string; volId: string } | null>(null)
+
+  const onChapterDragStart = useCallback((e: React.DragEvent, chId: string, volId: string) => {
+    e.dataTransfer.setData('text/plain', chId)
+    e.dataTransfer.effectAllowed = 'move'
+    setDragChapter({ id: chId, volId: volId })
+  }, [])
+
+  const onChapterDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+  }, [])
+
+  const onChapterDrop = useCallback((e: React.DragEvent, targetVolId: string, targetIndex: number) => {
+    e.preventDefault()
+    if (!dragChapter) return
+
+    const { id, volId } = dragChapter
+    // 找到源章节所在卷的索引
+    const fromVol = volumes.find(v => v.id === volId)
+    const fromIdx = fromVol?.chapters.findIndex(c => c.id === id) ?? -1
+
+    if (fromIdx >= 0 && volId === targetVolId) {
+      reorderChapters(volId, fromIdx, targetIndex)
+    }
+    setDragChapter(null)
+  }, [dragChapter, volumes, reorderChapters])
 
   // 计算总字数
   const totalWords = volumes.reduce(
@@ -99,9 +127,14 @@ export function OutlinePanel() {
                   {vol.chapters.map((ch) => (
                     <div
                       key={ch.id}
+                      draggable
+                      onDragStart={(e) => onChapterDragStart(e, ch.id, vol.id)}
+                      onDragOver={onChapterDragOver}
+                      onDrop={(e) => onChapterDrop(e, vol.id, ch.chapterNumber - 1)}
                       onClick={() => setActiveChapter(ch.id)}
                       className={`flex items-center gap-1 px-1.5 py-1 rounded text-xs cursor-pointer group
                         transition-colors
+                        ${dragChapter?.id === ch.id ? 'opacity-40' : ''}
                         ${activeChapterId === ch.id
                           ? 'bg-accent-primary/15 text-accent-primary'
                           : 'text-white/50 hover:bg-white/5 hover:text-white/70'
