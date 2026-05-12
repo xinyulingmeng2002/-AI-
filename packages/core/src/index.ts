@@ -5,5 +5,6 @@ export * from './model-router'
 export * from './extraction'
 export * from './audit'
 export * from './rag'
+export * from './templates'
 
-export const VERSION = '0.2.0'
+export const VERSION = '1.0.0'

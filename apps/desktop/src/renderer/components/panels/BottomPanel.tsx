@@ -1,7 +1,7 @@
 import { useWorkbenchStore, type BottomPanelTab } from '@/stores/workbench'
 import { useCharacterStore } from '@/stores/characters'
 import { useOutlineStore } from '@/stores/outline'
-import { Users, Globe, Link, FileText, Wand2, Clock, GitGraph, GitBranch, Layout } from 'lucide-react'
+import { Users, Globe, Link, FileText, Wand2, Clock, GitGraph, GitBranch, Layout, BookMarked } from 'lucide-react'
 import { CharacterPanel } from './CharacterPanel'
 import { CharacterEditor } from './CharacterEditor'
 import { ChapterOutlineEditor } from './ChapterOutlineEditor'
@@ -13,6 +13,7 @@ import { OutlineComparePanel } from './OutlineComparePanel'
 import { RelationshipGraph } from './RelationshipGraph'
 import { SubplotPanel } from './SubplotPanel'
 import { StoryboardPanel } from './StoryboardPanel'
+import { GlossaryPanel } from './GlossaryPanel'
 
 const TABS: Array<{ id: BottomPanelTab; label: string; icon: React.ReactNode }> = [
   { id: 'characters', label: '人物', icon: <Users size={13} /> },
@@ -20,6 +21,7 @@ const TABS: Array<{ id: BottomPanelTab; label: string; icon: React.ReactNode }> 
   { id: 'subplots', label: '支线', icon: <GitBranch size={13} /> },
   { id: 'storyboard', label: '故事板', icon: <Layout size={13} /> },
   { id: 'world', label: '世界观', icon: <Globe size={13} /> },
+  { id: 'glossary', label: '词典', icon: <BookMarked size={13} /> },
   { id: 'hooks', label: '伏笔', icon: <Link size={13} /> },
   { id: 'timeline', label: '时间线', icon: <Clock size={13} /> },
   { id: 'outline-compare', label: '纲要', icon: <FileText size={13} /> },
@@ -60,6 +62,7 @@ export function BottomPanel() {
         {bottomPanelTab === 'relations' && <RelationshipGraph />}
         {bottomPanelTab === 'subplots' && <SubplotPanel />}
         {bottomPanelTab === 'storyboard' && <StoryboardPanel />}
+        {bottomPanelTab === 'glossary' && <GlossaryPanel />}
         {bottomPanelTab === 'namegen' && <NameGenerator />}
         {bottomPanelTab === 'outline-compare' && <OutlineComparePanel />}
       </div>

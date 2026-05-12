@@ -10,7 +10,9 @@
       "Read(//c/Users/王甚/.agents/skills/planning-with-files/**)",
       "Bash(npm install *)",
       "Bash(uipro init *)",
-      "Read(//c/Users/王甚/.claude/skills/**)"
+      "Read(//c/Users/王甚/.claude/skills/**)",
+      "Bash(sed -i 's/v1.3 | 日期：2026-05-12 | 状态：v0.2完成 ~80%/v1.5 | 日期：2026-05-12 | 状态：v0.3全部完成/' docs/02-项目架构书.md)",
+      "Bash(sed -i 's/v1.3 | 日期：2026-05-12 | 状态：v0.2完成，v0.3规划中/v1.5 | 日期：2026-05-12 | 状态：v0.3全部完成/' docs/03-操作规范书.md)"
     ]
   }
 }
