@@ -11,18 +11,9 @@ files:
   - "!node_modules/**/*.{mk,a,o}"
 
 asar: true
-
 npmRebuild: false
 
 win:
   target:
-    - target: nsis
+    - target: zip
       arch: [x64]
-  sign: null
-
-nsis:
-  oneClick: false
-  allowToChangeInstallationDirectory: true
-  createDesktopShortcut: true
-  createStartMenuShortcut: true
-  shortcutName: 心御AI小说辅助器
