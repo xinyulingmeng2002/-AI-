@@ -4,6 +4,8 @@ import { sendChatMessage, clearRouterCache } from '@/services/chat-service'
 import { tryExtract } from '@/services/extraction-service'
 import { ExtractionCardComponent } from './ExtractionCard'
 import { useModelConfigStore } from '@/stores/model-config'
+import { useWorkspaceStore } from '@/stores/workspace'
+import { applyExtractionCard } from '@/services/truth-files-service'
 import type { ExtractionCard } from '@mindforge/core'
 
 type AIIdentity = 'sister' | 'brother' | 'mentor'
@@ -55,6 +57,26 @@ export function ChatHubPanel() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const models = useModelConfigStore((s) => s.models)
+  const currentWorkspaceId = useWorkspaceStore((s) => s.currentWorkspaceId)
+
+  // 监听审核结果事件
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail
+      if (detail?.message) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `audit_${Date.now()}`,
+            role: 'system',
+            content: detail.message
+          }
+        ])
+      }
+    }
+    window.addEventListener('audit-result', handler)
+    return () => window.removeEventListener('audit-result', handler)
+  }, [])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -164,14 +186,24 @@ export function ChatHubPanel() {
     }
   }
 
-  const handleExtractionConfirm = (cardId: string) => {
-    setMessages((prev) =>
-      prev.map((m) =>
-        m.extractionCard?.id === cardId
-          ? { ...m, extractionCard: { ...m.extractionCard!, confirmed: true } }
-          : m
-      )
-    )
+  const handleExtractionConfirm = async (cardId: string) => {
+    // 找到对应的提取卡片
+    let card: ExtractionCard | null = null
+    setMessages((prev) => {
+      const updated = prev.map((m) => {
+        if (m.extractionCard?.id === cardId) {
+          card = m.extractionCard
+          return { ...m, extractionCard: { ...m.extractionCard, confirmed: true } }
+        }
+        return m
+      })
+      return updated
+    })
+
+    // 写入数据库
+    if (card && currentWorkspaceId) {
+      await applyExtractionCard(card, currentWorkspaceId)
+    }
   }
 
   const handleExtractionReject = (cardId: string) => {
@@ -212,7 +244,13 @@ export function ChatHubPanel() {
 
         {messages.map((msg) => (
           <div key={msg.id}>
-            {msg.role === 'user' ? (
+            {msg.role === 'system' ? (
+              <div className="flex justify-center">
+                <div className="bg-accent-secondary/10 border border-accent-secondary/20 rounded-lg px-4 py-3 text-xs text-white/70 max-w-[90%] leading-relaxed whitespace-pre-wrap">
+                  {msg.content}
+                </div>
+              </div>
+            ) : msg.role === 'user' ? (
               <div className="flex gap-2 justify-end">
                 <div className="bg-accent-primary/15 rounded-lg rounded-tr-none px-3 py-2 text-sm text-white/80 max-w-[85%]">
                   {msg.content}

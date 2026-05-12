@@ -3,5 +3,6 @@
 
 export * from './model-router'
 export * from './extraction'
+export * from './audit'
 
 export const VERSION = '0.1.0'

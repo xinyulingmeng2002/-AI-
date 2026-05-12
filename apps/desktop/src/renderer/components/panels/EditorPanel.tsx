@@ -1,16 +1,23 @@
-import { useRef, useEffect, useCallback } from 'react'
-import { PenLine, Save } from 'lucide-react'
+import { useRef, useEffect, useCallback, useState } from 'react'
+import { PenLine, Save, ShieldCheck } from 'lucide-react'
 import { TipTapEditor } from '@/components/editor/TipTapEditor'
 import { useEditorStore } from '@/stores/editor'
 import { useOutlineStore } from '@/stores/outline'
+import { triggerAudit, formatAuditMessage } from '@/services/audit-service'
 
 const AUTO_SAVE_DELAY = 2000 // 2秒无操作后自动保存
 
 export function EditorPanel() {
   const { wordCount, isDirty, setWordCount, setIsDirty, setSaved } = useEditorStore()
-  const { activeChapterId, updateChapterWordCount } = useOutlineStore()
+  const { activeChapterId, updateChapterWordCount, volumes } = useOutlineStore()
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastContentRef = useRef({ html: '', text: '' })
+  const [auditing, setAuditing] = useState(false)
+
+  // 找到当前章节的纲要
+  const currentChapter = volumes
+    .flatMap((v) => v.chapters)
+    .find((c) => c.id === activeChapterId)
 
   const doSave = useCallback(async (html: string, text: string) => {
     if (!activeChapterId) return
@@ -57,6 +64,25 @@ export function EditorPanel() {
     return () => window.removeEventListener('keydown', handler)
   }, [doSave])
 
+  const handleAudit = async () => {
+    if (!currentChapter?.outline || !lastContentRef.current.text) return
+    setAuditing(true)
+    try {
+      const result = await triggerAudit({
+        chapterOutline: currentChapter.outline,
+        chapterContent: lastContentRef.current.text
+      })
+      // 将审核结果以系统消息形式展示（通过自定义事件通知中枢）
+      window.dispatchEvent(new CustomEvent('audit-result', {
+        detail: { message: formatAuditMessage(result), result }
+      }))
+    } catch (err) {
+      console.error('Audit failed:', err)
+    } finally {
+      setAuditing(false)
+    }
+  }
+
   // 组件卸载时保存
   useEffect(() => {
     return () => {
@@ -78,6 +104,17 @@ export function EditorPanel() {
           )}
         </div>
         <div className="flex items-center gap-3 text-xs text-white/30">
+          {currentChapter?.outline && lastContentRef.current.text && (
+            <button
+              onClick={handleAudit}
+              disabled={auditing}
+              className="flex items-center gap-1 text-accent-primary/60 hover:text-accent-primary transition-colors"
+              title="审核本章"
+            >
+              <ShieldCheck size={13} />
+              {auditing ? '审核中...' : '审核'}
+            </button>
+          )}
           <span>{wordCount} 字</span>
           <span className={isDirty ? 'text-yellow-400/60' : 'text-green-400/60'}>
             {isDirty ? '● 未保存' : '● 已保存'}
