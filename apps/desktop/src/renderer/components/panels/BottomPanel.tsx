@@ -9,14 +9,15 @@ import { WorldPanel } from './WorldPanel'
 import { HooksPanel } from './HooksPanel'
 import { NameGenerator } from './NameGenerator'
 import { TimelinePanel } from './TimelinePanel'
+import { OutlineComparePanel } from './OutlineComparePanel'
 
 const TABS: Array<{ id: BottomPanelTab; label: string; icon: React.ReactNode }> = [
   { id: 'characters', label: '人物', icon: <Users size={13} /> },
   { id: 'world', label: '世界观', icon: <Globe size={13} /> },
   { id: 'hooks', label: '伏笔', icon: <Link size={13} /> },
   { id: 'timeline', label: '时间线', icon: <Clock size={13} /> },
-  { id: 'namegen', label: '起名', icon: <Wand2 size={13} /> },
-  { id: 'outline-compare', label: '纲要', icon: <FileText size={13} /> }
+  { id: 'outline-compare', label: '纲要对照', icon: <FileText size={13} /> },
+  { id: 'namegen', label: '起名', icon: <Wand2 size={13} /> }
 ]
 
 export function BottomPanel() {
@@ -51,12 +52,7 @@ export function BottomPanel() {
         {bottomPanelTab === 'hooks' && <HooksPanel />}
         {bottomPanelTab === 'timeline' && <TimelinePanel />}
         {bottomPanelTab === 'namegen' && <NameGenerator />}
-        {bottomPanelTab === 'outline-compare' && (
-          <div className="p-4 text-white/25 text-xs text-center py-8">
-            纲要对照 — 实时对比写作内容与章纲要<br />
-            （将在后续迭代中实现，当前可在章纲要编辑器中查看）
-          </div>
-        )}
+        {bottomPanelTab === 'outline-compare' && <OutlineComparePanel />}
       </div>
 
       {/* 模态层 */}

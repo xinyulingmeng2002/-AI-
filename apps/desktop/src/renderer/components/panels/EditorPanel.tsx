@@ -8,6 +8,7 @@ import { useWorkspaceStore } from '@/stores/workspace'
 import { triggerAudit, formatAuditMessage } from '@/services/audit-service'
 import { runObserver } from '@/services/observer-service'
 import { detectSensitiveWords, formatSensitiveReport } from '@/services/sensitive-words'
+import { checkStyle, formatStyleReport } from '@mindforge/core'
 
 const AUTO_SAVE_DELAY = 2000 // 2秒无操作后自动保存
 
@@ -151,6 +152,12 @@ export function EditorPanel() {
 
       // 敏感词检测
       const sensitiveMatches = detectSensitiveWords(lastContentRef.current.text)
+      // 语言风格检查
+      const styleIssues = checkStyle(lastContentRef.current.text)
+      if (styleIssues.length > 0) {
+        msg += '\n\n' + formatStyleReport(styleIssues)
+      }
+
       if (sensitiveMatches.length > 0) {
         msg += '\n\n' + formatSensitiveReport(sensitiveMatches)
       }
