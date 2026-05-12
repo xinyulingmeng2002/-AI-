@@ -57,4 +57,4 @@ try {
     const prefs = JSON.parse(saved)
     useWorkbenchStore.setState(prefs)
   }
-} catch { /* ignore */ })
+} catch { /* ignore */ }
