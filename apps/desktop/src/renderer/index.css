@@ -87,3 +87,20 @@
     margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;
   }
 }
+
+/* 移动端响应式 */
+@layer utilities {
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+@media (max-width: 768px) {
+  /* 移动端：面板堆叠而非四分屏 */
+  .panel-header { font-size: 11px; }
+  .btn-primary, .btn-ghost { min-height: 44px; min-width: 44px; }
+  .input-field { font-size: 16px; } /* 防止iOS缩放 */
+}

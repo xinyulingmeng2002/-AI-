@@ -20,3 +20,5 @@ export function formatDate(dateStr: string): string {
 export function formatNumber(n: number): string {
   return n.toLocaleString('zh-CN')
 }
+
+export * from './platform'
