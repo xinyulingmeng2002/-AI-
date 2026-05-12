@@ -12,7 +12,6 @@ import {
   PanelLeft, PanelRight, PanelBottom,
   LayoutDashboard, Settings, BookOpen
 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 
 function ResizeHandle({ direction, onResize }: {
   direction: 'horizontal' | 'vertical'

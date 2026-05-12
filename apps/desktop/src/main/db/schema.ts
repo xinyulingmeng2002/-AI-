@@ -115,6 +115,7 @@ CREATE VIRTUAL TABLE IF NOT EXISTS chapters_fts USING fts5(
   chapter_id,
   volume_number,
   chapter_number,
+  workspace_id,
   tokenize='unicode61'
 );
 `

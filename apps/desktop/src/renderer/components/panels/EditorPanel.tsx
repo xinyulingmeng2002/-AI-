@@ -82,7 +82,7 @@ export function EditorPanel() {
       if (!result.success) {
         result = await window.mindforge.db.insert('chapter_summaries', {
           id: activeChapterId,
-          workspace_id: '',
+          workspace_id: currentWorkspaceId ?? '',
           volume_number: chapter?.volumeNumber ?? 1,
           chapter_number: chapter?.chapterNumber ?? 1,
           title: chapter?.title ?? '',

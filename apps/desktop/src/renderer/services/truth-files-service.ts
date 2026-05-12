@@ -67,7 +67,6 @@ async function applyEntity(
       const result = await window.mindforge.db.insert('dynamic_modules', {
         workspace_id: workspaceId,
         module_name: moduleName,
-        name,
         data_json: JSON.stringify({ name, description: value, category })
       })
       return result.success ? `新增${moduleName}「${name}」` : null
