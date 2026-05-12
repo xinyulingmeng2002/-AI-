@@ -4,7 +4,13 @@
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Read(//c/Users/王甚/.claude/plugins/cache/claude-plugins-official/superpowers/5.1.0/skills/**)",
+      "Read(//c/Users/王甚/.claude/commands/website-builder-setup/**)",
+      "Read(//c/Users/王甚/.agents/skills/planning-with-files/**)",
+      "Bash(npm install *)",
+      "Bash(uipro init *)",
+      "Read(//c/Users/王甚/.claude/skills/**)"
     ]
   }
 }

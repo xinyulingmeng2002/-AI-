@@ -56,17 +56,34 @@
 
   .btn-primary {
     @apply px-4 py-2 bg-accent-primary hover:bg-accent-primary/80 text-white rounded-md
-           transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+           transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+    min-height: 36px; min-width: 44px;
+  }
+  .btn-primary:focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent-primary;
   }
 
   .btn-ghost {
     @apply px-3 py-1.5 text-white/50 hover:text-white hover:bg-white/5 rounded-md
-           transition-colors duration-150;
+           transition-all duration-200;
+    min-height: 32px; min-width: 32px;
+  }
+  .btn-ghost:focus-visible {
+    @apply outline-2 outline-offset-1 outline-white/30;
   }
 
   .input-field {
     @apply w-full px-3 py-2 bg-surface-lighter border border-white/10 rounded-md
-           text-white placeholder-white/30 focus:outline-none focus:border-accent-primary/50
-           transition-colors duration-150;
+           text-white placeholder-white/30 transition-all duration-200;
+    min-height: 36px;
+  }
+  .input-field:focus {
+    @apply outline-none border-accent-primary/50 ring-1 ring-accent-primary/20;
+  }
+
+  /* 无障碍：跳过导航 */
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0;
+    margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;
   }
 }
