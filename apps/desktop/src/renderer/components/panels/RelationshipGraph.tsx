@@ -96,14 +96,29 @@ export function RelationshipGraph() {
     setAddingEdge({ from: fromId, to: '', label: '盟友' })
   }
 
+  const { updateCharacter } = useCharacterStore()
+
   const confirmEdge = () => {
     if (!addingEdge?.to) { setAddingEdge(null); return }
-    setEdges((prev) => [...prev, {
+    const newEdge = {
       from: addingEdge.from,
       to: addingEdge.to,
       label: addingEdge.label,
       color: RELATION_COLORS[addingEdge.label] ?? RELATION_COLORS['默认']
-    }])
+    }
+    setEdges((prev) => [...prev, newEdge])
+
+    // 持久化到角色Store → 角色Store会自动写回DB
+    const source = characters.find((c) => c.id === addingEdge.from)
+    if (source) {
+      const relationships = [...(source.relationships || []), {
+        targetCharacterId: addingEdge.to,
+        type: addingEdge.label,
+        description: ''
+      }]
+      updateCharacter(addingEdge.from, { relationships })
+    }
+
     setAddingEdge(null)
     setSelectedNode(null)
   }
