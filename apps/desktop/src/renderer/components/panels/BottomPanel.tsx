@@ -1,5 +1,10 @@
 import { useWorkbenchStore, type BottomPanelTab } from '@/stores/workbench'
+import { useCharacterStore } from '@/stores/characters'
+import { useOutlineStore } from '@/stores/outline'
 import { Users, Globe, Link, FileText } from 'lucide-react'
+import { CharacterPanel } from './CharacterPanel'
+import { CharacterEditor } from './CharacterEditor'
+import { ChapterOutlineEditor } from './ChapterOutlineEditor'
 
 const TABS: Array<{ id: BottomPanelTab; label: string; icon: React.ReactNode }> = [
   { id: 'characters', label: '人物档案', icon: <Users size={13} /> },
@@ -10,6 +15,8 @@ const TABS: Array<{ id: BottomPanelTab; label: string; icon: React.ReactNode }> 
 
 export function BottomPanel() {
   const { bottomPanelTab, setBottomPanelTab } = useWorkbenchStore()
+  const editingId = useCharacterStore((s) => s.editingId)
+  const editingOutlineId = useOutlineStore((s) => s.editingOutlineId)
 
   return (
     <div className="h-full flex flex-col">
@@ -32,14 +39,35 @@ export function BottomPanel() {
       </div>
 
       {/* 内容区 */}
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="text-white/25 text-xs text-center py-8">
-          {bottomPanelTab === 'characters' && '人物档案系统 —— 从智能交流中枢聊天中动态填充'}
-          {bottomPanelTab === 'world' && '世界观管理 —— 地理、势力、规则、历史'}
-          {bottomPanelTab === 'hooks' && '伏笔追踪 —— 埋设 → 呼应 → 回收，全生命周期管理'}
-          {bottomPanelTab === 'outline-compare' && '纲要对照 —— 实时对比写作内容与章纲要'}
-        </div>
+      <div className="flex-1 overflow-hidden">
+        {bottomPanelTab === 'characters' && <CharacterPanel />}
+        {bottomPanelTab === 'world' && (
+          <div className="p-4 text-white/25 text-xs text-center py-8">
+            世界观管理 — 地理、势力、规则、历史<br />
+            （将在后续迭代中实现，当前可通过智能交流中枢聊天构建）
+          </div>
+        )}
+        {bottomPanelTab === 'hooks' && (
+          <div className="p-4 text-white/25 text-xs text-center py-8">
+            伏笔追踪 — 埋设 → 呼应 → 回收，全生命周期管理<br />
+            （将在后续迭代中实现）
+          </div>
+        )}
+        {bottomPanelTab === 'outline-compare' && (
+          <div className="p-4 text-white/25 text-xs text-center py-8">
+            纲要对照 — 实时对比写作内容与章纲要<br />
+            （将在后续迭代中实现，当前可在章纲要编辑器中查看）
+          </div>
+        )}
       </div>
+
+      {/* 模态层 */}
+      {editingId && <CharacterEditor />}
+      {editingOutlineId && (
+        <div className="fixed inset-y-0 right-0 w-[420px] bg-surface border-l border-white/10 shadow-2xl z-40">
+          <ChapterOutlineEditor />
+        </div>
+      )}
     </div>
   )
 }
