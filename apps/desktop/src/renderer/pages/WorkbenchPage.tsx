@@ -1,5 +1,6 @@
 import { useCallback, useRef, useEffect } from 'react'
 import { useWorkbenchStore } from '@/stores/workbench'
+import { useEditorStore } from '@/stores/editor'
 import { OutlinePanel } from '@/components/panels/OutlinePanel'
 import { EditorPanel } from '@/components/panels/EditorPanel'
 import { ChatHubPanel } from '@/components/panels/ChatHubPanel'
@@ -61,6 +62,7 @@ export function WorkbenchPage() {
     toggleLeftPanel, toggleRightPanel, toggleBottomPanel,
     setLeftPanelRatio, setRightPanelRatio, setBottomPanelRatio
   } = useWorkbenchStore()
+  const { wordCount, currentChapter } = useEditorStore()
 
   // 键盘快捷键
   useEffect(() => {
@@ -198,8 +200,8 @@ export function WorkbenchPage() {
           <PanelRight size={12} />
         </button>
         <span className="flex-1" />
-        <span>0 字</span>
-        <span>第 1 章</span>
+        <span>{wordCount} 字</span>
+        <span>{currentChapter}</span>
         <span className="flex gap-1">
           <span className="w-1.5 h-1.5 rounded-full bg-green-500/50 inline-block" />
           模型已连接

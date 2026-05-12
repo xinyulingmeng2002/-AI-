@@ -1,6 +1,15 @@
 import { PenLine } from 'lucide-react'
+import { TipTapEditor } from '@/components/editor/TipTapEditor'
+import { useEditorStore } from '@/stores/editor'
 
 export function EditorPanel() {
+  const { wordCount, isDirty, setWordCount, setIsDirty } = useEditorStore()
+
+  const handleContentChange = (_html: string, _text: string, count: number) => {
+    setWordCount(count)
+    if (!isDirty) setIsDirty(true)
+  }
+
   return (
     <div className="h-full flex flex-col">
       <div className="panel-header">
@@ -8,17 +17,21 @@ export function EditorPanel() {
           <PenLine size={14} />
           <span>编辑器</span>
         </div>
-        <span className="text-xs text-white/30">第1章 · 未保存</span>
+        <div className="flex items-center gap-3 text-xs text-white/30">
+          <span>{wordCount} 字</span>
+          <span>{isDirty ? '● 未保存' : '已保存'}</span>
+        </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-6">
-        <textarea
-          className="w-full h-full bg-transparent text-white/80 text-base leading-relaxed resize-none
-                     placeholder-white/20 focus:outline-none font-serif"
-          placeholder="在此开始写作...
+      <div className="flex-1 overflow-hidden">
+        <TipTapEditor
+          onContentChange={handleContentChange}
+          placeholder="开始书写...
 
-TipTap 富文本编辑器（支持 Markdown）将在下一步集成。
-当前为文本域占位。"
-          readOnly
+TipTap 富文本编辑器已就绪，支持 Markdown 快捷输入：
+  # 空格 → 标题
+  - 空格 → 无序列表
+  > 空格 → 引用
+  **文字** → 加粗"
         />
       </div>
     </div>
