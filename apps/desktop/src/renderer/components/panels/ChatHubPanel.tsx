@@ -169,7 +169,14 @@ export function ChatHubPanel() {
     // 保存用户消息
     saveMessage(userMsg)
 
+    // 从当前作品状态动态组装上下文
+    const { buildHubContext } = await import('@/services/hub-context')
+    const hubCtx = currentWorkspaceId
+      ? await buildHubContext(currentWorkspaceId, identity)
+      : null
+
     const config = IDENTITY_CONFIG[identity]
+    const systemPrompt = hubCtx?.systemPrompt ?? config.systemPrompt
 
     // 构建消息历史给 AI
     const history = messages
@@ -178,7 +185,7 @@ export function ChatHubPanel() {
 
     await sendChatMessage(
       [
-        { role: 'system', content: config.systemPrompt },
+        { role: 'system', content: systemPrompt },
         ...history,
         { role: 'user', content: trimmed }
       ],
