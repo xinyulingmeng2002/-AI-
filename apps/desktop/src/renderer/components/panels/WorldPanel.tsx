@@ -33,6 +33,7 @@ export function WorldPanel() {
     if (!currentWorkspaceId) { setLoading(false); return }
     loadModules()
   }, [currentWorkspaceId])
+useEffect(() => { return onHubEvent((event) => { if (event.type === 'extraction:applied' || event.type === 'module:edited') loadModules() }) }, [currentWorkspaceId])
 
   const loadModules = async () => {
     if (!currentWorkspaceId) return

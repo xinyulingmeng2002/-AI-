@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useWorkspaceStore } from '@/stores/workspace'
+import { onHubEvent } from '@/services/hub-events'
 import { GitBranch, Plus, Trash2, Edit3, Check, X, AlertTriangle, CheckCircle2, Circle } from 'lucide-react'
 import { EmptyState, LoadingText } from '@/components/shared/Loading'
 

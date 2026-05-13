@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useWorkspaceStore } from '@/stores/workspace'
+import { onHubEvent } from '@/services/hub-events'
 import { Clock, Plus, Trash2, Edit3, Check, X } from 'lucide-react'
 import { EmptyState, LoadingText } from '@/components/shared/Loading'
 
@@ -26,6 +27,7 @@ export function TimelinePanel() {
     if (!currentWorkspaceId) { setLoading(false); return }
     loadEvents()
   }, [currentWorkspaceId])
+useEffect(() => { return onHubEvent((event) => { if (event.type === 'extraction:applied' || event.type === 'module:edited') loadEvents() }) }, [currentWorkspaceId])
 
   const loadEvents = async () => {
     if (!currentWorkspaceId) return
