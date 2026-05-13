@@ -182,9 +182,11 @@ export const useModelConfigStore = create<ModelConfigState>((set, get) => ({
 loadPersist().then((saved) => {
   if (saved) {
     useModelConfigStore.setState({
-      models: saved.models,
-      defaultModelId: saved.defaultModelId,
-      taskMappings: saved.taskMappings as Record<string, string | null>
+      models: saved.models ?? [],
+      defaultModelId: saved.defaultModelId ?? '',
+      taskMappings: (saved.taskMappings as Record<string, string | null>) ?? {
+        chat: null, outline: null, draft: null, audit: null, extract: null
+      }
     })
   }
 })
