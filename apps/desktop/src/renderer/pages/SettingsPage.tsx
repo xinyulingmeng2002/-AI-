@@ -49,7 +49,7 @@ function AddModelForm({ onClose }: { onClose: () => void }) {
               value={provider}
               onChange={(e) => handleProviderChange(e.target.value as ModelProvider)}
             >
-              {PROVIDER_PRESETS.map((p) => (
+              {(PROVIDER_PRESETS ?? []).map((p) => (
                 <option key={p.provider} value={p.provider}>{p.name}</option>
               ))}
             </select>
@@ -185,7 +185,7 @@ export function SettingsPage() {
             <div className="mt-6 pt-4 border-t border-white/5">
               <h3 className="text-xs font-medium text-white/50 mb-3">任务级模型分配（可选）</h3>
               <div className="space-y-2">
-                {(Object.entries(TASK_DEFAULTS) as [TaskType, { temperature: number; description: string }][]).map(([task, info]) => (
+                {(Object.entries(TASK_DEFAULTS ?? {}) as [TaskType, { temperature: number; description: string }][]).map(([task, info]) => (
                   <div key={task} className="flex items-center justify-between">
                     <div>
                       <span className="text-xs text-white/70">{info.description}</span>
