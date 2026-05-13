@@ -1,9 +1,8 @@
-// 要素提取服务 — 桥接核心提取器与 UI 层
+// 要素提取服务
 
-import { createExtractor, type ExtractionResult, type ExtractionCard } from '@mindforge/core'
-import { sendChatMessage } from './chat-service'
+import { createRouter, type ExtractionCard, EXTRACTION_SYSTEM_PROMPT } from '@mindforge/core'
+import { useModelConfigStore } from '@/stores/model-config'
 
-// 内存中的设定摘要缓存（后续迁移到 Truth Files）
 let existingSummary = ''
 
 export function updateExistingSummary(summary: string) {
@@ -19,45 +18,44 @@ export async function tryExtract(
   userMessage: string,
   callbacks: ExtractionCallbacks
 ): Promise<void> {
-  if (!extractor.shouldExtract(userMessage)) {
-    callbacks.onNoExtraction()
-    return
-  }
-
-  // 使用专门的 extract task type 调用 LLM
-  // 这里用非流式调用以获得完整的 JSON 响应
-  const { createRouter } = await import('@mindforge/core')
-  const { useModelConfigStore } = await import('@/stores/model-config')
-
   const store = useModelConfigStore.getState()
   const configs = store.toCoreConfigs()
-  const defaultId = store.defaultModelId
-
   if (configs.length === 0) {
     callbacks.onNoExtraction()
     return
   }
 
-  const router = createRouter(configs, defaultId)
+  const router = createRouter(configs, store.defaultModelId)
 
   try {
     const response = await router.chat('extract', [
-      { role: 'system', content: '你是一位专业的网文创作要素分析师。' },
+      { role: 'system', content: EXTRACTION_SYSTEM_PROMPT },
       { role: 'user', content: userMessage }
     ])
 
-    // 使用提取器解析结果
-    const result = extractor.toExtractionCard(await extractor.extract(userMessage) ?? {
-      intent: 'chat',
-      entities: [],
-      relations: [],
-      summary: ''
-    })
+    const jsonStr = response.content.match(/\{[\s\S]*\}/)?.[0]
+    if (!jsonStr) { callbacks.onNoExtraction(); return }
 
-    if (result.entities.length > 0) {
-      callbacks.onCardGenerated(result)
-      // 更新设定摘要
-      existingSummary += `\n${result.summary}`
+    const parsed = JSON.parse(jsonStr)
+    if (!parsed.entities?.length) { callbacks.onNoExtraction(); return }
+
+    const card: ExtractionCard = {
+      id: `ext_${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      summary: parsed.summary ?? '',
+      entities: parsed.entities.map((e: Record<string, unknown>, i: number) => ({
+        category: e.category as ExtractionCard['entities'][0]['category'],
+        name: e.name as string,
+        value: e.value as string,
+        relation: (parsed.relations?.[i]?.type as string) ?? 'new'
+      })),
+      suggestedQuestions: (parsed.suggestedQuestions as string[]) ?? [],
+      confirmed: false
+    }
+
+    if (card.entities.length > 0) {
+      existingSummary += `\n${card.summary}`
+      callbacks.onCardGenerated(card)
     } else {
       callbacks.onNoExtraction()
     }

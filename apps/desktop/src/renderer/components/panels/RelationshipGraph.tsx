@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { useCharacterStore } from '@/stores/characters'
 import { useWorkspaceStore } from '@/stores/workspace'
+import type { Relationship } from '@mindforge/shared'
 import { Users, Plus, X, Move } from 'lucide-react'
 import { EmptyState, LoadingText } from '@/components/shared/Loading'
 
@@ -111,11 +112,14 @@ export function RelationshipGraph() {
     // 持久化到角色Store → 角色Store会自动写回DB
     const source = characters.find((c) => c.id === addingEdge.from)
     if (source) {
-      const relationships = [...(source.relationships || []), {
+      const newRel = {
         targetCharacterId: addingEdge.to,
         type: addingEdge.label,
-        description: ''
-      }]
+        description: '',
+        intensity: 5,
+        history: ''
+      }
+      const relationships: Relationship[] = [...(source.relationships || []), newRel]
       updateCharacter(addingEdge.from, { relationships })
     }
 

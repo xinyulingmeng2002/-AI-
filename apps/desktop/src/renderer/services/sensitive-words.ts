@@ -25,14 +25,15 @@ export interface SensitiveMatch {
 
 export function detectSensitiveWords(text: string): SensitiveMatch[] {
   const matches: SensitiveMatch[] = []
-  for (const pattern of SENSITIVE_PATTERNS) {
+  for (const item of SENSITIVE_PATTERNS) {
     let match: RegExpExecArray | null
+    const pattern = item.pattern
     pattern.lastIndex = 0
     while ((match = pattern.exec(text)) !== null) {
       matches.push({
         word: match[0],
-        label: pattern.label,
-        severity: pattern.severity,
+        label: item.label,
+        severity: item.severity,
         position: match.index
       })
     }

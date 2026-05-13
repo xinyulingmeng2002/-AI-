@@ -4,7 +4,7 @@ export type Platform = 'electron' | 'capacitor' | 'web'
 
 export function detectPlatform(): Platform {
   // Capacitor 注入 capacitor 全局变量
-  if (typeof window !== 'undefined' && (window as Record<string, unknown>).Capacitor) {
+  if (typeof window !== 'undefined' && (window as unknown as Record<string, unknown>).Capacitor) {
     return 'capacitor'
   }
   // Electron 注入 process.versions.electron (通过 preload)
