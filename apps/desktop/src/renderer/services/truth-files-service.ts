@@ -1,5 +1,6 @@
 // Truth Files 写入服务 — 从提取卡片到数据库
 
+import { emitHubEvent } from './hub-events'
 import type { ExtractionCard, EntityCategory } from '@mindforge/core'
 import { useCharacterStore, createDefaultCharacter } from '@/stores/characters'
 import { useWorkspaceStore } from '@/stores/workspace'
@@ -19,6 +20,8 @@ export async function applyExtractionCard(
     }
   }
 
+  // 广播事件，通知所有面板刷新
+  emitHubEvent('extraction:applied', { results })
   return {
     success: true,
     summary: results.length > 0 ? results.join('；') : '要素已同步'

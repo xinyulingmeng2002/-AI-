@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useWorkspaceStore } from '@/stores/workspace'
+import { emitHubEvent } from '@/services/hub-events'
 import { Globe, MapPin, Shield, BookOpen, Trash2, Edit3, Check, X, Plus } from 'lucide-react'
 import { EmptyState, LoadingText } from '@/components/shared/Loading'
 
@@ -65,6 +66,7 @@ export function WorldPanel() {
       data_json: JSON.stringify({ name: editName, description: editDesc, category: modules.find(m => m.id === editingId)?.category })
     })
     setEditingId(null)
+    emitHubEvent('module:edited', { module: `世界观/${editName}` })
     loadModules()
   }
 
@@ -82,6 +84,7 @@ export function WorldPanel() {
     })
     setNewItemName('')
     setAddingCategory(null)
+    emitHubEvent('module:edited', { module: `世界观/${newItemName.trim()}` })
     loadModules()
   }
 

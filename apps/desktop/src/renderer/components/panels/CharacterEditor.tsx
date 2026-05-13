@@ -1,4 +1,5 @@
 import { useCharacterStore } from '@/stores/characters'
+import { emitHubEvent } from '@/services/hub-events'
 import { X, Save } from 'lucide-react'
 
 export function CharacterEditor() {
@@ -115,7 +116,7 @@ export function CharacterEditor() {
         </div>
 
         <div className="p-4 border-t border-white/5">
-          <button onClick={() => setEditing(null)} className="btn-primary text-xs w-full flex items-center justify-center gap-1">
+          <button onClick={() => { emitHubEvent('module:edited', { module: `人物/${char.name}` }); setEditing(null) }} className="btn-primary text-xs w-full flex items-center justify-center gap-1">
             <Save size={12} /> 完成编辑
           </button>
         </div>

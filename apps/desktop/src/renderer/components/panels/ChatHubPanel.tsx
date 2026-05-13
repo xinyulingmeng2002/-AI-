@@ -126,9 +126,36 @@ export function ChatHubPanel() {
     }
     window.addEventListener('audit-result', handler)
     window.addEventListener('observer-result', handler)
+
+    // 中枢事件：模块编辑 → 显示变更通知
+    const hubHandler = (e: Event) => {
+      const detail = (e as CustomEvent).detail
+      if (detail?.type === 'extraction:applied') {
+        const results = detail.payload?.results as string[] | undefined
+        if (results?.length) {
+          setMessages((prev) => [...prev, {
+            id: `hub_ext_${Date.now()}`,
+            role: 'system',
+            content: `已同步要素：${results.join('；')}`
+          }])
+        }
+      }
+      if (detail?.type === 'module:edited') {
+        const module = detail.payload?.module as string
+        if (module) {
+          setMessages((prev) => [...prev, {
+            id: `hub_edit_${Date.now()}`,
+            role: 'system',
+            content: `[注意]「${module}」已被修改。建议检查与现有设定的一致性。`
+          }])
+        }
+      }
+    }
+    window.addEventListener('hub-event', hubHandler)
     return () => {
       window.removeEventListener('audit-result', handler)
       window.removeEventListener('observer-result', handler)
+      window.removeEventListener('hub-event', hubHandler)
     }
   }, [])
 
