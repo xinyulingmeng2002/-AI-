@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useWorkspaceStore } from '@/stores/workspace'
-import { emitHubEvent } from '@/services/hub-events'
+import { emitHubEvent, onHubEvent } from '@/services/hub-events'
 import { Globe, MapPin, Shield, BookOpen, Trash2, Edit3, Check, X, Plus } from 'lucide-react'
 import { EmptyState, LoadingText } from '@/components/shared/Loading'
 

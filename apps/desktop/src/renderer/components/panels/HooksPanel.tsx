@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useWorkspaceStore } from '@/stores/workspace'
+import { onHubEvent } from '@/services/hub-events'
 import { Link, AlertTriangle, CheckCircle2, Clock, Trash2 } from 'lucide-react'
 import { EmptyState, LoadingText } from '@/components/shared/Loading'
 
@@ -35,6 +36,15 @@ export function HooksPanel() {
   useEffect(() => {
     if (!currentWorkspaceId) { setLoading(false); return }
     loadHooks()
+  }, [currentWorkspaceId])
+
+  // 监听中枢提取事件，自动刷新
+  useEffect(() => {
+    return onHubEvent((event) => {
+      if (event.type === 'extraction:applied' || event.type === 'module:edited') {
+        loadHooks()
+      }
+    })
   }, [currentWorkspaceId])
 
   const loadHooks = async () => {
